@@ -16,7 +16,7 @@ class HomeScreen extends Component {
 
         <Text style={styles.description}>
           Descubre nuevas recetas, guarda tus favoritas y encuentra inspiración
-          para cada comida, de forma rápida y sencilla.
+          para cada comida, de forma rápida y sencillaa.
         </Text>
 
         {/* Botón Iniciar Sesión */}
