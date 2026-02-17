@@ -1,1 +1,2 @@
 # RecetApp
+hola compañeros
