@@ -38,7 +38,7 @@ export default class Login extends Component {
         {/* Botón iniciar sesión */}
         <TouchableOpacity
           style={styles.button}
-          onPress={() => this.props.navigation.navigate('Buscador')}
+          onPress={() => this.props.navigation.navigate('Home')}
         >
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
