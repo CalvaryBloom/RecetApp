@@ -1,126 +1,100 @@
-import React, { Component } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
+import React, { useState } from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 
-class HomeScreen extends Component {
-  render() {
-    return (
-      <View style={styles.container}>
-        
-        {/* Logo desde assets */}
-        <Image
-          source={require('./assets/image1.png')}
-          style={styles.logo}
+import PerfilUsuario from "./src/screens/PerfilUsuario";
+import EditarUsuario from "./src/screens/EditarUsuario";
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+function UsuarioStack() {
+  const [user, setUser] = useState({
+    nombre: "Pedro",
+    apellidos: "Martínez Mañas",
+    correo: "pedromama@gmail.com",
+    password: "************",
+    alergias: "melocotón, gluten",
+  });
+
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen
+        name="PerfilUsuario"
+        children={(props) => (
+          <PerfilUsuario {...props} user={user} setUser={setUser} />
+        )}
+      />
+
+      <Stack.Screen
+        name="EditarUsuario"
+        children={(props) => (
+          <EditarUsuario {...props} user={user} setUser={setUser} />
+        )}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function Home() {
+  return null;
+}
+
+function Favoritos() {
+  return null;
+}
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+  screenOptions={({ route }) => ({
+    headerShown: false,
+    tabBarStyle: {
+      height: 60,
+      backgroundColor: "#CCD5AE", // Fondo verde
+      borderTopWidth: 0,
+    },
+    tabBarActiveTintColor: "red",   // Icono seleccionado en rojo
+    tabBarInactiveTintColor: "white", // Iconos no seleccionados en blanco
+
+    tabBarIcon: ({ color, size }) => {
+      let iconName;
+
+      if (route.name === "Usuario") iconName = "person-outline";
+      if (route.name === "Home") iconName = "home-outline";
+      if (route.name === "Favoritos") iconName = "heart-outline";
+
+      return <Ionicons name={iconName} size={24} color={color} />;
+    },
+  })}
+>
+        <Tab.Screen
+          name="Usuario"
+          component={UsuarioStack}
+          options={{
+            tabBarIcon: () => <Ionicons name="person-outline"  size={24} />,
+          }}
         />
 
-        <Text style={styles.description}>
-          Descubre nuevas recetas, guarda tus favoritas y encuentra inspiración
-          para cada comida, de forma rápida y sencillaa.
-        </Text>
+        <Tab.Screen
+          name="Home"
+          component={Home}
+          options={{
+            tabBarIcon: () => <Ionicons name="home-outline" size={24} />,
+          }}
+        />
 
-        {/* Botón Iniciar Sesión */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => this.props.navigation.navigate('Login')}
-        >
-          <Text style={styles.buttonText}>Iniciar Sesión</Text>
-        </TouchableOpacity>
-
-        {/* Botón Registrarse */}
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => this.props.navigation.navigate('Registro')}
-        >
-          <Text style={styles.buttonText}>Registrarse</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+        <Tab.Screen
+          name="Favoritos"
+          component={Favoritos}
+          options={{
+            tabBarIcon: () => <Ionicons name="heart-outline" size={24} />,
+          }}
+        />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
 }
-
-class LoginScreen extends Component {
-  render() {
-    return (
-      <View style={styles.screenContainer}>
-        <Text style={styles.screenTitle}>Pantalla de Login</Text>
-      </View>
-    );
-  }
-}
-
-class RegistroScreen extends Component {
-  render() {
-    return (
-      <View style={styles.screenContainer}>
-        <Text style={styles.screenTitle}>Pantalla de Registro</Text>
-      </View>
-    );
-  }
-}
-
-const Stack = createStackNavigator();
-
-export default class App extends Component {
-  render() {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Inicio" component={HomeScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Registro" component={RegistroScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FEFAE0',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 30,
-  },
-
-  logo: {
-    width: 320,
-    height: 120,
-    marginBottom: 20,
-  },
-
-  description: {
-    fontSize: 16,
-    textAlign: 'center',
-    color: '#444',
-    marginBottom: 40,
-  },
-
-  button: {
-    backgroundColor: '#CCD5AE',
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 20,
-    marginTop: 15,
-    width: '70%',
-  },
-
-  buttonText: {
-    color: 'black',
-    fontSize: 15,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-
-  screenContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  screenTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-});
