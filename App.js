@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import Login from './src/screens/Login';
+import Registro from './src/screens/Registro';
 
 class HomeScreen extends Component {
   render() {
@@ -39,25 +41,6 @@ class HomeScreen extends Component {
   }
 }
 
-class LoginScreen extends Component {
-  render() {
-    return (
-      <View style={styles.screenContainer}>
-        <Text style={styles.screenTitle}>Pantalla de Login</Text>
-      </View>
-    );
-  }
-}
-
-class RegistroScreen extends Component {
-  render() {
-    return (
-      <View style={styles.screenContainer}>
-        <Text style={styles.screenTitle}>Pantalla de Registro</Text>
-      </View>
-    );
-  }
-}
 
 const Stack = createStackNavigator();
 
@@ -67,8 +50,8 @@ export default class App extends Component {
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Inicio" component={HomeScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Registro" component={RegistroScreen} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="Registro" component={Registro} />
         </Stack.Navigator>
       </NavigationContainer>
     );
