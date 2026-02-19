@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from './src/screens/Login';
-import Registro from './src/Registro';
+import Registro from './src/screens/Registro';
 
 class HomeScreen extends Component {
   render() {
