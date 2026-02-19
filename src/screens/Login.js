@@ -8,7 +8,7 @@ export default class Login extends Component {
 
         {/* Logo */}
         <Image
-          source={require('../assets/image1.png')}
+          source={require('../../assets/image1.png')}
           style={styles.logo}
         />
 

@@ -6,7 +6,7 @@ const ContrasenyaOlvidada = (props) => {
     <View style={styles.container}>
 
       <Image
-        source={require('../assets/image1.png')}
+        source={require('../../assets/image1.png')}
         style={styles.logo}
       />
 

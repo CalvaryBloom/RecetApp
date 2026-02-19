@@ -6,7 +6,7 @@ export default function Registro({ navigation }) {
     <View style={styles.container}>
 
       <Image
-        source={require('../assets/image1.png')}
+        source={require('../../assets/image1.png')}
         style={styles.logo}
       />
 
