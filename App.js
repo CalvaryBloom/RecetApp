@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Login from './src/screens/Login';
 import Registro from './src/screens/Registro';
+import ContrasenyaOlvidada from './src/screens/ContrasenyaOlvidada';
 
 class HomeScreen extends Component {
   render() {
@@ -49,9 +50,13 @@ export default class App extends Component {
     return (
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+          {/* IMPORTANTE
+            PARA QUE FUNCIONE CORRECTAMENTE LA NAVEGACION TIENE  QUE ESTAR AQUI TODAS LAS PANTALLAS
+          */}
           <Stack.Screen name="Inicio" component={HomeScreen} />
           <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Registro" component={Registro} />
+          <Stack.Screen name="ContrasenyaOlvidada" component={ContrasenyaOlvidada} />
         </Stack.Navigator>
       </NavigationContainer>
     );
