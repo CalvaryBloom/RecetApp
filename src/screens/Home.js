@@ -189,7 +189,7 @@ export default function Home({ navigation }) {
       {/* Barra de Navegación Inferior */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="home" size={28} color="#FF4B4B" />
+          <Ionicons name="home" size={28} color="#CCD5AE" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate('Favoritos')}>
           <Ionicons name="heart-outline" size={28} color="#666" />
@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   filterButtonActive: {
-    backgroundColor: '#FF4B4B',
-    borderColor: '#FF4B4B',
+    backgroundColor: '#CCD5AE',
+    borderColor: '#CCD5AE',
   },
   filtersWrapper: {
     marginBottom: 15,
@@ -302,8 +302,8 @@ const styles = StyleSheet.create({
     borderColor: '#DDDDDD',
   },
   filterChipActive: {
-    backgroundColor: '#FF4B4B',
-    borderColor: '#FF4B4B',
+    backgroundColor: '#CCD5AE',
+    borderColor: '#CCD5AE',
   },
   filterChipText: {
     color: '#555',
