@@ -27,13 +27,13 @@ export default function FavoritosScreen() {
                 source={require('../../assets/image1.png')}
                 style={styles.logo}
         />
-        <Pressable>
-            <Text style={styles.back}>←</Text>
-        </Pressable>
+
         <Text style={styles.title}>LISTA FAVORITOS</Text>
+
         <Pressable style={styles.selectButton}>
           <Text style={styles.selectText}>SELECCIONAR</Text>
         </Pressable>
+
       </View>
 
       {/* Lista */}
@@ -73,7 +73,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 320,
     height: 120,
-    alignSelf: 'center',
     marginBottom: 30,
   },
 
