@@ -11,6 +11,8 @@ import Home from "./src/screens/Home";
 import Inicio from "./src/screens/Inicio";
 import Favoritos from "./src/screens/Favoritos";
 import PerfilUsuario from "./src/screens/PerfilUsuario";
+import EditarUsuario from "./src/screens/EditarUsuario";
+
 import RecetaBuscada from "./src/screens/RecetaBuscada";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
@@ -20,6 +22,14 @@ const Stack = createStackNavigator();
 export default function App() {
   const navigationRef = useNavigationContainerRef();
   const [currentRoute, setCurrentRoute] = useState("Inicio");
+// Estado global del usuario
+  const [user, setUser] = useState({
+    nombre: "Sergio",
+    apellidos: "García",
+    correo: "sergio@example.com",
+    password: "123456",
+    alergias: "Ninguna",
+  });
 
   const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario"];
   const mostrarBarra = rutasConBarra.includes(currentRoute);
@@ -52,7 +62,13 @@ export default function App() {
         {/* OTRAS PANTALLAS */}
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Favoritos" component={Favoritos} />
-        <Stack.Screen name="PerfilUsuario" component={PerfilUsuario} />
+        {/* Pasamos user y setUser */}
+        <Stack.Screen name="PerfilUsuario">
+          {(props) => <PerfilUsuario {...props} user={user} />}
+        </Stack.Screen>
+        <Stack.Screen name="EditarUsuario">
+          {(props) => <EditarUsuario {...props} user={user} setUser={setUser} />}
+        </Stack.Screen>
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
       </Stack.Navigator>
 
