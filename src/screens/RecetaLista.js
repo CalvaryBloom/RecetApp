@@ -12,15 +12,38 @@ import {
 export default function DesayunoScreen() {
 
   const meals = [
-    {
-      title: "TOSTADAS CON TOMATE Y JAMÓN",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc4XY7qI2l_ohuHrK7HTc8DQTJ5eLYyAeb1w&s"
-    },
-    {
-      title: "TOSTADAS AGUACATE",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5AcZXS09njuYqfHRcQqRTytiCH5e1Xm09lA&s"
-    }
-  ];
+  {
+    category: "Desayuno",
+    recipes: [
+      {
+        title: "TOSTADAS CON TOMATE Y JAMÓN",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc4XY7qI2l_ohuHrK7HTc8DQTJ5eLYyAeb1w&s",
+        description: "Tostadas crujientes con tomate natural y jamón serrano, perfectas para empezar el día.",
+        ingredients: [
+          "Pan",
+          "Tomate",
+          "Jamón serrano",
+          "Aceite de oliva",
+          "Sal"
+        ]
+      },
+      {
+        title: "TOSTADAS DE AGUACATE",
+        image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5AcZXS09njuYqfHRcQqRTytiCH5e1Xm09lA&s",
+        description: "Tostadas saludables con aguacate cremoso, ideales para un desayuno nutritivo.",
+        ingredients: [
+          "Pan",
+          "Aguacate",
+          "Limón",
+          "Aceite de oliva",
+          "Sal",
+          "Pimienta"
+        ]
+      }
+    ]
+  }
+];
+
 
   return (
     <SafeAreaView style={styles.container}>
