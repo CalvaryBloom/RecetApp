@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   Image,
   TouchableOpacity,
   SafeAreaView,
@@ -45,26 +44,22 @@ export default function RecetaBuscada(props) {
   }
 
   function cambiarFavorito() {
-    if (esFavorito === true) {
-      
-      setEsFavorito(false);
-      navigation.navigate("ElegirLista");
-    } else {
-      setEsFavorito(true);
+    const nuevoEstado = !esFavorito;
+    setEsFavorito(nuevoEstado);
+
+    // Solo navegar cuando se marca como favorito
+    if (nuevoEstado) {
+      navigation.navigate("ElegirLista", { receta });
     }
   }
 
-  let iconoFavorito = "heart-outline";
-  let colorFavorito = "#666";
-
-  if (esFavorito === true) {
-    iconoFavorito = "heart";
-    colorFavorito = "#FF4B4B";
-  }
+  let iconoFavorito = esFavorito ? "heart" : "heart-outline";
+  let colorFavorito = esFavorito ? "#FF4B4B" : "#666";
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
+        {/* HEADER */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/image1.png")}
@@ -96,6 +91,7 @@ export default function RecetaBuscada(props) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
+          {/* IMAGEN */}
           <View style={styles.imageWrapper}>
             <Image source={{ uri: receta.image }} style={styles.image} />
 
@@ -108,6 +104,7 @@ export default function RecetaBuscada(props) {
             </TouchableOpacity>
           </View>
 
+          {/* INGREDIENTES */}
           <View style={styles.ingredientsHeader}>
             <Text style={styles.ingredientsTitle}>INGREDIENTES</Text>
             <Ionicons name="restaurant-outline" size={18} color="#8C7A5A" />
