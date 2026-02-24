@@ -13,7 +13,7 @@ import Favoritos from "./src/screens/Favoritos";
 import PerfilUsuario from "./src/screens/PerfilUsuario";
 import EditarUsuario from "./src/screens/EditarUsuario";
 
-import RecetaBuscada from "./src/screens/RecetaBuscada";
+import ElegirLista from "./src/screens/ElegirLista";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
@@ -72,7 +72,7 @@ export default function App() {
           )}
         </Stack.Screen>
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
-        <Stack.Screen name="RecetaLista" component={RecetaBuscada} />
+        <Stack.Screen name="ElegirLista" component={RecetaBuscada} />
       </Stack.Navigator>
 
       {mostrarBarra && <BarraBusqueda currentRoute={currentRoute} />}
