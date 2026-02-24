@@ -4,17 +4,16 @@ import {
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import RecetApp from "./src/screens/RecetApp";
 import Login from "./src/screens/Login";
 import Registro from "./src/screens/Registro";
 import ContrasenyaOlvidada from "./src/screens/ContrasenyaOlvidada";
 import Home from "./src/screens/Home";
-import Inicio from "./src/screens/Inicio";
-import Favoritos from "./src/screens/Favoritos";
+import RecetaBuscada from "./src/screens/RecetaBuscada";
+import ElegirLista from "./src/screens/ElegirLista";
 import PerfilUsuario from "./src/screens/PerfilUsuario";
 import EditarUsuario from "./src/screens/EditarUsuario";
-
-import ElegirLista from "./src/screens/ElegirLista";
-import RecetaBuscada from "./src/screens/RecetaBuscada";
+import Favoritos from "./src/screens/Favoritos";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
@@ -52,7 +51,7 @@ export default function App() {
         {/* IMPORTANTE
           PARA QUE FUNCIONE CORRECTAMENTE LA NAVEGACION TIENE  QUE ESTAR AQUI TODAS LAS PANTALLAS
         */}
-        <Stack.Screen name="Inicio" component={Inicio} />
+        <Stack.Screen name="Inicio" component={RecetApp} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Registro" component={Registro} />
         <Stack.Screen
