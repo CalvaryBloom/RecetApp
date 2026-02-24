@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -9,43 +9,59 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import BarraBusqueda from "../components/BarraBusqueda";
 
-export default function RecetaBuscada({ route, navigation }) {
-  // Receta que llega desde Home
-  const recipe = route?.params?.recipe;
+export default function RecetaBuscada(props) {
+  const navigation = props.navigation;
+  const route = props.route;
 
-  // Si no llega nada, ponemos un fallback para que no crashee
-  const fallbackRecipe = useMemo(
-    () => ({
-      title: "Receta",
-      image:
-        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=60",
-      description: "Descripción no disponible.",
-      ingredients: ["1 ingrediente", "2 ingrediente", "3 ingrediente"],
-    }),
-    [],
-  );
+  const recetaPorDefecto = {
+    title: "Receta",
+    image:
+      "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=60",
+    description: "Descripción no disponible.",
+    ingredients: ["1 ingrediente", "2 ingrediente", "3 ingrediente"],
+  };
 
-  const receta = recipe || fallbackRecipe;
+  let receta = recetaPorDefecto;
 
-  // Ingredientes: si no vienen, intentamos generarlos desde description o dejamos fallback
-  const ingredientes = useMemo(() => {
-    if (
-      receta.ingredients &&
-      Array.isArray(receta.ingredients) &&
-      receta.ingredients.length > 0
-    ) {
-      return receta.ingredients;
+  if (route && route.params && route.params.recipe) {
+    receta = route.params.recipe;
+  }
+
+  let ingredientes = recetaPorDefecto.ingredients;
+
+  if (receta.ingredients && Array.isArray(receta.ingredients)) {
+    if (receta.ingredients.length > 0) {
+      ingredientes = receta.ingredients;
     }
-    return fallbackRecipe.ingredients;
-  }, [receta, fallbackRecipe.ingredients]);
+  }
 
-  const [isFav, setIsFav] = useState(false);
+  const [esFavorito, setEsFavorito] = useState(false);
+
+  function volverAtras() {
+    navigation.goBack();
+  }
+
+  function cambiarFavorito() {
+    if (esFavorito === true) {
+      setEsFavorito(false);
+    } else {
+      setEsFavorito(true);
+    }
+  }
+
+  let iconoFavorito = "heart-outline";
+  let colorFavorito = "#666";
+
+  if (esFavorito === true) {
+    iconoFavorito = "heart";
+    colorFavorito = "#FF4B4B";
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Header: logo + flecha atrás */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/image1.png")}
@@ -53,71 +69,60 @@ export default function RecetaBuscada({ route, navigation }) {
             resizeMode="contain"
           />
 
-          <View style={styles.headerRight}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => navigation.goBack()}
-              accessibilityLabel="Volver"
-            >
-              <Ionicons name="arrow-back-outline" size={26} color="#333" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={styles.iconButton}
+            onPress={volverAtras}
+            accessibilityLabel="Volver"
+          >
+            <Ionicons name="arrow-back-outline" size={26} color="#333" />
+          </TouchableOpacity>
         </View>
 
-        {/* “Has elegido” + barra tipo búsqueda */}
         <Text style={styles.chosenLabel}>Has elegido:</Text>
 
         <View style={styles.chosenBar}>
           <Text style={styles.chosenText} numberOfLines={1}>
             {receta.title}
           </Text>
-
           <Ionicons name="search-outline" size={20} color="#666" />
         </View>
 
-        {/* Título */}
         <Text style={styles.title}>{receta.title}</Text>
 
-        {/* Contenido scroll */}
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Imagen */}
           <View style={styles.imageWrapper}>
             <Image source={{ uri: receta.image }} style={styles.image} />
 
             <TouchableOpacity
               style={styles.heartButton}
-              onPress={() => setIsFav(!isFav)}
+              onPress={cambiarFavorito}
               accessibilityLabel="Marcar como favorito"
             >
-              <Ionicons
-                name={isFav ? "heart" : "heart-outline"}
-                size={22}
-                color={isFav ? "#FF4B4B" : "#666"}
-              />
+              <Ionicons name={iconoFavorito} size={22} color={colorFavorito} />
             </TouchableOpacity>
           </View>
 
-          {/* Ingredientes */}
           <View style={styles.ingredientsHeader}>
             <Text style={styles.ingredientsTitle}>INGREDIENTES</Text>
             <Ionicons name="restaurant-outline" size={18} color="#8C7A5A" />
           </View>
 
           <View style={styles.ingredientsBox}>
-            {ingredientes.map((item, idx) => (
-              <Text key={`${item}-${idx}`} style={styles.ingredientItem}>
-                • {item}
+            {ingredientes.map((ingrediente, idx) => (
+              <Text key={idx} style={styles.ingredientItem}>
+                • {ingrediente}
               </Text>
             ))}
           </View>
 
-          {/* Un poco de espacio para que no lo tape la barra inferior */}
-          <View style={{ height: 90 }} />
+          <View style={styles.bottomSpace} />
         </ScrollView>
       </View>
+
+      <BarraBusqueda currentRoute="Home" />
     </SafeAreaView>
   );
 }
@@ -143,10 +148,6 @@ const styles = StyleSheet.create({
   logo: {
     width: 110,
     height: 45,
-  },
-  headerRight: {
-    flexDirection: "row",
-    alignItems: "center",
   },
   iconButton: {
     padding: 8,
@@ -190,7 +191,6 @@ const styles = StyleSheet.create({
   },
 
   imageWrapper: {
-    position: "relative",
     borderRadius: 14,
     overflow: "hidden",
     marginBottom: 18,
@@ -211,7 +211,6 @@ const styles = StyleSheet.create({
   ingredientsHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
     marginBottom: 10,
   },
   ingredientsTitle: {
@@ -219,6 +218,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#8C7A5A",
     letterSpacing: 0.5,
+    marginRight: 8,
   },
 
   ingredientsBox: {
@@ -233,5 +233,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 4,
+  },
+
+  bottomSpace: {
+    height: 90,
   },
 });
