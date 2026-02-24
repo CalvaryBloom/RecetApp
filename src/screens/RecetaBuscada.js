@@ -48,6 +48,7 @@ export default function RecetaBuscada(props) {
     if (esFavorito === true) {
       
       setEsFavorito(false);
+      navigation.navigate("ElegirLista");
     } else {
       setEsFavorito(true);
     }
