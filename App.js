@@ -14,6 +14,7 @@ import PerfilUsuario from "./src/screens/PerfilUsuario";
 import EditarUsuario from "./src/screens/EditarUsuario";
 
 import ElegirLista from "./src/screens/ElegirLista";
+import RecetaBuscada from "./src/screens/RecetaBuscada";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
@@ -72,7 +73,7 @@ export default function App() {
           )}
         </Stack.Screen>
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
-        <Stack.Screen name="ElegirLista" component={RecetaBuscada} />
+        <Stack.Screen name="ElegirLista" component={ElegirLista} />
       </Stack.Navigator>
 
       {mostrarBarra && <BarraBusqueda currentRoute={currentRoute} />}

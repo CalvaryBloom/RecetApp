@@ -9,7 +9,6 @@ import {
   SafeAreaView,
 } from "react-native";
 
-import BarraBusqueda from "../../components/BarraBusqueda";
 
 export default function RecetaLista() {
   const listas = [
@@ -110,9 +109,6 @@ export default function RecetaLista() {
           </Pressable>
         </View>
       </View>
-
-      {/* Barra inferior REAL (la misma que el resto de pantallas) */}
-      <BarraBusqueda currentRoute="Home" />
     </SafeAreaView>
   );
 }
