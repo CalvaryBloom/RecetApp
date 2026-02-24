@@ -22,7 +22,7 @@ const Stack = createStackNavigator();
 export default function App() {
   const navigationRef = useNavigationContainerRef();
   const [currentRoute, setCurrentRoute] = useState("Inicio");
-// Estado global del usuario
+  // Estado global del usuario
   const [user, setUser] = useState({
     nombre: "Sergio",
     apellidos: "García",
@@ -67,9 +67,12 @@ export default function App() {
           {(props) => <PerfilUsuario {...props} user={user} />}
         </Stack.Screen>
         <Stack.Screen name="EditarUsuario">
-          {(props) => <EditarUsuario {...props} user={user} setUser={setUser} />}
+          {(props) => (
+            <EditarUsuario {...props} user={user} setUser={setUser} />
+          )}
         </Stack.Screen>
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
+        <Stack.Screen name="RecetaLista" component={RecetaBuscada} />
       </Stack.Navigator>
 
       {mostrarBarra && <BarraBusqueda currentRoute={currentRoute} />}
