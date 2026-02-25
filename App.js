@@ -16,6 +16,8 @@ import EditarUsuario from "./src/screens/EditarUsuario";
 import ElegirLista from "./src/screens/ElegirLista";
 import RecetaBuscada from "./src/screens/RecetaBuscada";
 
+import RecetaLista from "./src/screens/RecetaLista";
+
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
 const Stack = createStackNavigator();
@@ -32,7 +34,7 @@ export default function App() {
     alergias: "Ninguna",
   });
 
-  const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario"];
+  const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario", "RecetaLista"];
   const mostrarBarra = rutasConBarra.includes(currentRoute);
 
   const actualizarRutaActual = () => {
@@ -74,6 +76,7 @@ export default function App() {
         </Stack.Screen>
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
         <Stack.Screen name="ElegirLista" component={ElegirLista} />
+        <Stack.Screen name="RecetaLista" component={RecetaLista} />
       </Stack.Navigator>
 
       {mostrarBarra && <BarraBusqueda currentRoute={currentRoute} />}
