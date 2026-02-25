@@ -6,51 +6,77 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  Image,
+  Alert,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import styles from "../styles/ModalCrearLista";
 
-export default function ModalCrearLista({
-  visible,
-  onClose,
-  onAddImage,
-  onSave,
-}) {
+export default function ModalCrearLista({ visible, onClose, onSave }) {
   const [nombreLista, setNombreLista] = useState("");
-
-  const guardar = () => {
-    const name = nombreLista.trim();
-    if (!name) return;
-
-    // 👇 “relación” con el padre: le mandamos el nombre creado
-    onSave?.(name);
-
-    // reset
-    setNombreLista("");
-    onClose?.();
-  };
+  const [imageUri, setImageUri] = useState(null);
 
   const cerrar = () => {
     setNombreLista("");
+    setImageUri(null);
     onClose?.();
+  };
+
+  const elegirImagen = async () => {
+    // Pedir permiso
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permiso denegado", "Activa permisos de galería.");
+      return;
+    }
+
+    // Abrir galería
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+    }
+  };
+
+  const guardar = () => {
+    const nombre = nombreLista.trim();
+    if (!nombre) {
+      Alert.alert("Error", "Escribe un nombre para la lista");
+      return;
+    }
+
+    //  Esto es lo que hace que “se guarde” en ElegirLista
+    onSave?.({ nombre, imagen: imageUri });
+
+    cerrar();
   };
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={cerrar}>
-      {/* Overlay (click fuera para cerrar) */}
       <Pressable style={styles.overlay} onPress={cerrar}>
-        {/* Caja modal (evita cerrar al tocar dentro) */}
         <Pressable style={styles.modalBox} onPress={() => {}}>
-          <Text style={styles.modalTitle}>Modal Crear lista</Text>
-
           <TextInput
             style={styles.input}
             placeholder="Nombre lista"
-            placeholderTextColor="#666"
             value={nombreLista}
             onChangeText={setNombreLista}
           />
 
-          <TouchableOpacity style={styles.buttonSoft} onPress={onAddImage}>
+          {/* Preview opcional */}
+          {imageUri ? (
+            <View style={{ alignItems: "center", marginBottom: 12 }}>
+              <Image
+                source={{ uri: imageUri }}
+                style={{ width: 90, height: 90, borderRadius: 12 }}
+              />
+            </View>
+          ) : null}
+
+          <TouchableOpacity style={styles.buttonSoft} onPress={elegirImagen}>
             <Text style={styles.buttonText}>Añadir imagen</Text>
           </TouchableOpacity>
 

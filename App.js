@@ -15,6 +15,7 @@ import PerfilUsuario from "./src/screens/PerfilUsuario";
 import EditarUsuario from "./src/screens/EditarUsuario";
 import Favoritos from "./src/screens/Favoritos";
 
+
 import RecetaLista from "./src/screens/RecetaLista";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
