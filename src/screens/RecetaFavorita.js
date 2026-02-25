@@ -109,6 +109,7 @@ export default function RecetaFavorita({ route, navigation }) {
           </View>
 
           <View style={{ height: 90 }} />
+          <BarraBusqueda currentRoute="Favoritos" />
         </ScrollView>
       </View>
     </SafeAreaView>

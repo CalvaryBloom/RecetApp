@@ -9,6 +9,8 @@ import {
   Pressable,
 } from "react-native";
 
+import BarraBusqueda from "../components/BarraBusqueda";
+
 
 export default function RecetaLista({ route, navigation }) {
   const categoria = route?.params?.categoria;
@@ -105,6 +107,7 @@ export default function RecetaLista({ route, navigation }) {
           ))
         )}
       </ScrollView>
+      <BarraBusqueda currentRoute="Favoritos" />
     </SafeAreaView>
   );
 }

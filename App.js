@@ -33,7 +33,7 @@ export default function App() {
     alergias: "Ninguna",
   });
 
-  const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario", "RecetaLista"];
+  const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario"];
   const mostrarBarra = rutasConBarra.includes(currentRoute);
 
   const actualizarRutaActual = () => {
