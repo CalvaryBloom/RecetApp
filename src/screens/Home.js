@@ -16,7 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import styles from "../styles/Home";
 
-// Datos de prueba (mock) ampliados con categorías para los filtros
+//Datos de prueba (mock) ampliados con categorías para los filtros
 const RECIPES = [
   {
     id: "1",
@@ -76,12 +76,12 @@ const AVAILABLE_FILTERS = [
 ];
 
 export default function Home({ navigation }) {
-  // Estados para la búsqueda y filtros
+  //Estados para la búsqueda y filtros
   const [searchText, setSearchText] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
 
-  // Lógica para aplicar los filtros seleccionados
+  //Lógica para aplicar los filtros seleccionados
   const toggleFilter = (filter) => {
     if (activeFilters.includes(filter)) {
       setActiveFilters(activeFilters.filter((f) => f !== filter));
@@ -90,7 +90,7 @@ export default function Home({ navigation }) {
     }
   };
 
-  // Filtrado cruzado: Búsqueda de texto + Filtros activos
+  //Filtrado cruzado: Búsqueda de texto + Filtros activos
   const filteredRecipes = RECIPES.filter((recipe) => {
     const matchesSearch = recipe.title
       .toLowerCase()
@@ -101,7 +101,7 @@ export default function Home({ navigation }) {
     return matchesSearch && matchesFilters;
   });
 
-  // Función que renderiza cada tarjeta de receta
+  //Función que renderiza cada tarjeta de receta
   const renderRecipeCard = ({ item }) => (
     //TouchableOpacity neus, para que al seleccionar salga de descrp de la receta
     <TouchableOpacity

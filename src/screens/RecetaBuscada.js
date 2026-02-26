@@ -47,7 +47,7 @@ export default function RecetaBuscada(props) {
     const nuevoEstado = !esFavorito;
     setEsFavorito(nuevoEstado);
 
-    // Solo navegar cuando se marca como favorito
+    //Solo navegar cuando se marca como favorito
     if (nuevoEstado) {
       navigation.navigate("ElegirLista", { receta });
     }
