@@ -40,7 +40,7 @@ export default function EditarUsuario({ navigation, user, setUser }) {
         <Text style={styles.title}>Editar Usuario</Text>
 
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={28} color="black" />
+          <Ionicons name="arrow-back-outline" size={28} marginLeft={155} color="black" />
         </TouchableOpacity>
       </View>
 

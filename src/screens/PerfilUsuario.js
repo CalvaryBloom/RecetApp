@@ -22,7 +22,7 @@ export default function PerfilUsuario({ navigation, user }) {
         <Text style={styles.title}>Perfil Usuario</Text>
 
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-          <Ionicons name="exit-outline" size={28} color="black" />
+          <Ionicons name="exit-outline" size={28} marginLeft={155}color="black" />
         </TouchableOpacity>
       </View>
 

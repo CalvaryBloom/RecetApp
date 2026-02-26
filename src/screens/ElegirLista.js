@@ -1,101 +1,100 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Pressable,
-  FlatList,
-  Alert,
-  SafeAreaView,
-} from "react-native";
+import React, { useMemo, useState } from "react";
+import { View, Text, Pressable, FlatList, Alert, SafeAreaView, Image } from "react-native";
 
 import styles from "../styles/RecetaLista";
 import BarraBusqueda from "../components/BarraBusqueda";
+import ModalCrearLista from "../components/ModalCrearLista";
 
+export default function ElegirLista({ route, navigation }) {
+  const receta = route?.params?.receta;
 
-export default function RecetaLista() {
-  const listas = [
-    { id: "1", nombre: "DESAYUNO" },
-    { id: "2", nombre: "ALMUERZO" },
-    { id: "3", nombre: "COMIDA" },
-    { id: "4", nombre: "MERIENDA" },
-    { id: "5", nombre: "CENA" },
-  ];
+  const listasIniciales = useMemo(
+    () => [
+      { id: "1", nombre: "DESAYUNO", imagen: null },
+      { id: "2", nombre: "ALMUERZO", imagen: null },
+      { id: "3", nombre: "COMIDA", imagen: null },
+      { id: "4", nombre: "MERIENDA", imagen: null },
+      { id: "5", nombre: "CENA", imagen: null },
+    ],
+    []
+  );
 
+  // ✅ ESTO ES LO QUE ARREGLA EL “NO SE GUARDA”
+  const [listas, setListas] = useState(listasIniciales);
   const [listaSeleccionadaId, setListaSeleccionadaId] = useState("");
 
-  function pulsarGuardar() {
-    if (listaSeleccionadaId === "") {
-      Alert.alert("Selecciona una lista");
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const pulsarCrearLista = () => setModalVisible(true);
+
+  const onSaveNewList = ({ nombre, imagen }) => {
+    const name = (nombre || "").trim().toUpperCase();
+    if (!name) return;
+
+    if (listas.some((l) => l.nombre === name)) {
+      Alert.alert("Esa lista ya existe");
       return;
     }
 
-    Alert.alert("Guardar", "Más adelante se conectará al backend");
+    const nueva = { id: String(Date.now()), nombre: name, imagen: imagen || null };
+    setListas((prev) => [...prev, nueva]);     // ✅ AHORA SÍ SE AÑADE
+    setListaSeleccionadaId(nueva.id);          // ✅ la selecciona
+  };
+
+const pulsarGuardar = () => {
+  if (!listaSeleccionadaId) {
+    Alert.alert("Selecciona una lista");
+    return;
   }
 
-  function pulsarCrearLista() {
-    Alert.alert("Crear lista", "Más adelante se conectará al backend");
+  // IMPORTANTE: la receta viene como route.params.receta
+  if (!receta) {
+    Alert.alert("Error", "No llegó la receta");
+    return;
   }
 
-  function pulsarVolver() {
-    Alert.alert("Volver", "Aquí irá navigation.goBack()");
-  }
+  // Navegamos a RecetaFavorita pasando el param que RecetaFavorita espera: { recipe }
+  navigation.navigate("RecetaFavorita", { recipe: receta });
+};
 
   return (
     <SafeAreaView style={styles.fondo}>
       <View style={styles.contenedor}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.marca}>RecetApp</Text>
-
-          <Pressable onPress={pulsarVolver} style={styles.botonVolver}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.botonVolver}>
             <Text style={styles.flecha}>←</Text>
           </Pressable>
         </View>
 
         <Text style={styles.titulo}>Elegir lista para guardar</Text>
-        <Text style={styles.subtitulo}>
-          Elige la lista donde quieres guardar la receta:
-        </Text>
+        <Text style={styles.subtitulo}>Elige la lista donde quieres guardar la receta:</Text>
 
         <FlatList
           data={listas}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.lista}
           renderItem={({ item }) => {
-            const estaSeleccionada = item.id === listaSeleccionadaId;
+            const selected = item.id === listaSeleccionadaId;
 
             return (
               <Pressable
                 onPress={() => setListaSeleccionadaId(item.id)}
-                style={[
-                  styles.pildoraBorde,
-                  estaSeleccionada ? styles.pildoraBordeSeleccionada : null,
-                ]}
+                style={[styles.pildoraBorde, selected ? styles.pildoraBordeSeleccionada : null]}
               >
-                <View
-                  style={[
-                    styles.pildoraDentro,
-                    estaSeleccionada ? styles.pildoraDentroSeleccionada : null,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.textoPildora,
-                      estaSeleccionada ? styles.textoPildoraSeleccionada : null,
-                    ]}
-                  >
+                <View style={[styles.pildoraDentro, selected ? styles.pildoraDentroSeleccionada : null]}>
+                  <Text style={[styles.textoPildora, selected ? styles.textoPildoraSeleccionada : null]}>
                     {item.nombre}
                   </Text>
 
-                  <View
-                    style={[
-                      styles.circuloImagen,
-                      estaSeleccionada
-                        ? styles.circuloImagenSeleccionada
-                        : null,
-                    ]}
-                  />
+                  <View style={[styles.circuloImagen, selected ? styles.circuloImagenSeleccionada : null]}>
+                    {item.imagen ? (
+                      <Image
+                        source={{ uri: item.imagen }}
+                        style={{ width: "100%", height: "100%", borderRadius: 999 }}
+                      />
+                    ) : null}
+                  </View>
                 </View>
               </Pressable>
             );
@@ -112,6 +111,14 @@ export default function RecetaLista() {
           </Pressable>
         </View>
       </View>
+
+      {/* ✅ MODAL CONECTADO */}
+      <ModalCrearLista
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={onSaveNewList}
+      />
+
       <BarraBusqueda currentRoute="Favoritos" />
     </SafeAreaView>
   );

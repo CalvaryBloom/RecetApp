@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
 import styles from "../styles/RecetaFavorito";
 
 export default function RecetaFavorita({ route, navigation }) {
