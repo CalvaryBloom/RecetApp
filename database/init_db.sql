@@ -11,19 +11,26 @@ DROP TABLE IF EXISTS ingredientes;
 DROP TABLE IF EXISTS recuperacion_password;
 DROP TABLE IF EXISTS recetas;
 DROP TABLE IF EXISTS usuarios;
+DROP TABLE IF EXISTS alergias;
 
 -- ==========================================
 -- CREACIÓN DE TABLAS
 -- ==========================================
 
+CREATE TABLE alergias (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL UNIQUE
+);
+
 CREATE TABLE usuarios (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    alergia_id BIGINT,
     nombre VARCHAR(100) NOT NULL,
     apellidos VARCHAR(150) NOT NULL,
     correo VARCHAR(150) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    alergias TEXT,
-    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (alergia_id) REFERENCES alergias(id) ON DELETE SET NULL
 );
 
 CREATE TABLE recetas (
@@ -102,12 +109,20 @@ CREATE TABLE recuperacion_password (
 -- INSERCIÓN DE DATOS DE PRUEBA (MOCKS)
 -- ==========================================
 
--- 1. Usuarios
-INSERT INTO usuarios (nombre, apellidos, correo, password, alergias) VALUES 
-('Borja', 'García', 'test@app.com', '123456', 'Ninguna'),
-('Ana', 'López', 'ana.lopez@app.com', 'hasheado123', 'Lactosa'),
-('Carlos', 'Martínez', 'carlos.m@app.com', 'hasheado123', 'Ninguna'),
-('Laura', 'Gómez', 'laura.g@app.com', 'hasheado123', 'Gluten');
+-- 1. Alergias
+INSERT IGNORE INTO alergias (nombre) VALUES 
+('Ninguna'), ('Lactosa'), ('Gluten'), ('Frutos secos'), ('Marisco');
+
+SET @id_ninguna = (SELECT id FROM alergias WHERE nombre = 'Ninguna' LIMIT 1);
+SET @id_lactosa = (SELECT id FROM alergias WHERE nombre = 'Lactosa' LIMIT 1);
+SET @id_gluten = (SELECT id FROM alergias WHERE nombre = 'Gluten' LIMIT 1);
+
+-- 1.5 Usuarios
+INSERT INTO usuarios (alergia_id, nombre, apellidos, correo, password) VALUES 
+(@id_ninguna, 'Borja', 'García', 'test@app.com', '123456'),
+(@id_lactosa, 'Ana', 'López', 'ana.lopez@app.com', 'hasheado123'),
+(@id_ninguna, 'Carlos', 'Martínez', 'carlos.m@app.com', 'hasheado123'),
+(@id_gluten, 'Laura', 'Gómez', 'laura.g@app.com', 'hasheado123');
 
 -- 2. Categorías
 INSERT IGNORE INTO categorias (nombre) VALUES 
