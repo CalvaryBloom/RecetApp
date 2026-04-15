@@ -100,7 +100,7 @@ CREATE TABLE lista_recetas (
     receta_id BIGINT NOT NULL,
     fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lista_id) REFERENCES listas(id) ON DELETE CASCADE,
-    FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE,
+    FOREIGN KEY (receta_id) REFERENCES recetas(id) ON DELETE CASCADE, 
     UNIQUE (lista_id, receta_id)
 );
 

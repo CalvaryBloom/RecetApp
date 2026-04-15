@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -81,6 +81,24 @@ export default function Home({ navigation }) {
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilters, setActiveFilters] = useState([]);
 
+  //Estado para guardar recetas que vengan del backend
+  const [recipes, setRecipes] = useState([]);
+
+  useEffect(() => {
+    const cargarRecetas = async () => {
+      try {
+        const res = await fetch("http://192.168.0.140:8080/api/recetas/getAll"); //ip Neus
+        const data = await res.json();
+
+        console.log("RECETAS DEL BACKEND:", data);
+        setRecipes(data);
+      } catch (error) {
+        console.log("ERROR AL CARGAR RECETAS:", error);
+      }
+    };
+    cargarRecetas();
+  }, []);
+
   //Lógica para aplicar los filtros seleccionados
   const toggleFilter = (filter) => {
     if (activeFilters.includes(filter)) {
@@ -91,14 +109,12 @@ export default function Home({ navigation }) {
   };
 
   //Filtrado cruzado: Búsqueda de texto + Filtros activos
-  const filteredRecipes = RECIPES.filter((recipe) => {
-    const matchesSearch = recipe.title
-      .toLowerCase()
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchesSearch = recipe.titulo
+      ?.toLowerCase()
       .includes(searchText.toLowerCase());
-    const matchesFilters =
-      activeFilters.length === 0 ||
-      activeFilters.some((filter) => recipe.categories.includes(filter));
-    return matchesSearch && matchesFilters;
+
+    return matchesSearch;
   });
 
   //Función que renderiza cada tarjeta de receta
@@ -109,11 +125,15 @@ export default function Home({ navigation }) {
       onPress={() => navigation.navigate("RecetaBuscada", { recipe: item })}
     >
       <View style={styles.card}>
-        <Image source={{ uri: item.image }} style={styles.cardImage} />
+        <Image source={{ uri: item.imagenUrl }} style={styles.cardImage} />
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <TouchableOpacity>
+            <Text style={styles.cardTitle}>{item.titulo}</Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("ElegirLista", { receta: item })
+              }
+            >
               <Ionicons name="heart-outline" size={24} color="#FF4B4B" />
             </TouchableOpacity>
           </View>
@@ -122,7 +142,7 @@ export default function Home({ navigation }) {
           </Text>
           <View style={styles.timeContainer}>
             <Ionicons name="time-outline" size={16} color="#666" />
-            <Text style={styles.timeText}>{item.time}</Text>
+            <Text style={styles.timeText}>{item.tiempoPreparacionMin} min</Text>
           </View>
         </View>
       </View>

@@ -14,7 +14,7 @@ import BarraBusqueda from "../components/BarraBusqueda";
 import ModalCrearLista from "../components/ModalCrearLista";
 
 export default function ElegirLista({ route, navigation }) {
-  const receta = route?.params?.receta;
+  const { receta } = route.params;
 
   const listasIniciales = useMemo(
     () => [
@@ -29,7 +29,6 @@ export default function ElegirLista({ route, navigation }) {
 
   const [listas, setListas] = useState(listasIniciales);
   const [listaSeleccionadaId, setListaSeleccionadaId] = useState("");
-
   const [modalVisible, setModalVisible] = useState(false);
 
   const pulsarCrearLista = () => setModalVisible(true);
@@ -48,6 +47,7 @@ export default function ElegirLista({ route, navigation }) {
       nombre: name,
       imagen: imagen || null,
     };
+
     setListas((prev) => [...prev, nueva]);
     setListaSeleccionadaId(nueva.id);
   };
