@@ -1,128 +1,63 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import BarraBusqueda from "../components/BarraBusqueda";
-import styles from "../styles/RecetaBuscada";
+import API_URL from "../api/api";
 
-export default function RecetaBuscada(props) {
-  const navigation = props.navigation;
-  const route = props.route;
+export default function RecetaBuscada({ route, navigation }) {
+  const { recipe } = route.params;
+  const [isFavorite, setIsFavorite] = useState(false);
 
-  const recetaPorDefecto = {
-    title: "Receta",
-    image:
-      "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=60",
-    description: "Descripción no disponible.",
-    ingredients: ["1 ingrediente", "2 ingrediente", "3 ingrediente"],
+  useEffect(() => {
+    checkFavorite();
+  }, []);
+
+  const checkFavorite = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/favoritos/isFavorite/${recipe.id}`
+      );
+      const data = await response.json();
+      setIsFavorite(data);
+    } catch (error) {
+      console.log("Error comprobando favorito:", error);
+    }
   };
 
-  let receta = recetaPorDefecto;
+  const toggleFavorite = async () => {
+    try {
+      const response = await fetch(
+        `${API_URL}/favoritos/toggle/${recipe.id}`,
+        {
+          method: "POST",
+        }
+      );
 
-  if (route && route.params && route.params.recipe) {
-    receta = route.params.recipe;
-  }
+      const data = await response.json();
 
-  let ingredientes = recetaPorDefecto.ingredients;
+      setIsFavorite(data.favorite);
 
-  if (receta.ingredients && Array.isArray(receta.ingredients)) {
-    if (receta.ingredients.length > 0) {
-      ingredientes = receta.ingredients;
+      if (data.favorite) {
+        navigation.navigate("ElegirLista", { receta: recipe });
+      }
+    } catch (error) {
+      console.log("Error cambiando favorito:", error);
     }
-  }
-
-  const [esFavorito, setEsFavorito] = useState(false);
-
-  function volverAtras() {
-    navigation.goBack();
-  }
-
-  function cambiarFavorito() {
-    const nuevoEstado = !esFavorito;
-    setEsFavorito(nuevoEstado);
-
-    //Solo navegar cuando se marca como favorito
-    if (nuevoEstado) {
-      navigation.navigate("ElegirLista", { receta });
-    }
-  }
-
-  let iconoFavorito = esFavorito ? "heart" : "heart-outline";
-  let colorFavorito = esFavorito ? "#FF4B4B" : "#666";
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* HEADER */}
-        <View style={styles.header}>
-          <Image
-            source={require("../../assets/image1.png")}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+    <View>
+      <Image source={{ uri: recipe.image }} style={{ width: "100%", height: 250 }} />
 
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={volverAtras}
-            accessibilityLabel="Volver"
-          >
-            <Ionicons name="arrow-back-outline" size={26} color="#333" />
-          </TouchableOpacity>
-        </View>
+      <Text>{recipe.title}</Text>
+      <Text>{recipe.description}</Text>
 
-        <Text style={styles.chosenLabel}>Has elegido:</Text>
-
-        <View style={styles.chosenBar}>
-          <Text style={styles.chosenText} numberOfLines={1}>
-            {receta.title}
-          </Text>
-          <Ionicons name="search-outline" size={20} color="#666" />
-        </View>
-
-        <Text style={styles.title}>{receta.title}</Text>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {/* IMAGEN */}
-          <View style={styles.imageWrapper}>
-            <Image source={{ uri: receta.image }} style={styles.image} />
-
-            <TouchableOpacity
-              style={styles.heartButton}
-              onPress={cambiarFavorito}
-              accessibilityLabel="Marcar como favorito"
-            >
-              <Ionicons name={iconoFavorito} size={22} color={colorFavorito} />
-            </TouchableOpacity>
-          </View>
-
-          {/* INGREDIENTES */}
-          <View style={styles.ingredientsHeader}>
-            <Text style={styles.ingredientsTitle}>INGREDIENTES</Text>
-            <Ionicons name="restaurant-outline" size={18} color="#8C7A5A" />
-          </View>
-
-          <View style={styles.ingredientsBox}>
-            {ingredientes.map((ingrediente, idx) => (
-              <Text key={idx} style={styles.ingredientItem}>
-                • {ingrediente}
-              </Text>
-            ))}
-          </View>
-
-          <View style={styles.bottomSpace} />
-        </ScrollView>
-      </View>
-
-      <BarraBusqueda currentRoute="Home" />
-    </SafeAreaView>
+      <TouchableOpacity onPress={toggleFavorite}>
+        <Ionicons
+          name={isFavorite ? "heart" : "heart-outline"}
+          size={32}
+          color="red"
+        />
+      </TouchableOpacity>
+    </View>
   );
 }

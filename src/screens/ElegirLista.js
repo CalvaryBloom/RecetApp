@@ -1,160 +1,92 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Pressable,
   FlatList,
-  Alert,
-  SafeAreaView,
-  Image,
+  TouchableOpacity,
+  TextInput,
+  Button,
 } from "react-native";
-
-import styles from "../styles/RecetaLista";
-import BarraBusqueda from "../components/BarraBusqueda";
-import ModalCrearLista from "../components/ModalCrearLista";
+import API_URL from "../api/api";
 
 export default function ElegirLista({ route, navigation }) {
-  const receta = route?.params?.receta;
+  const { receta } = route.params;
+  const [listas, setListas] = useState([]);
+  const [nombreLista, setNombreLista] = useState("");
 
-  const listasIniciales = useMemo(
-    () => [
-      { id: "1", nombre: "DESAYUNO", imagen: null },
-      { id: "2", nombre: "ALMUERZO", imagen: null },
-      { id: "3", nombre: "COMIDA", imagen: null },
-      { id: "4", nombre: "MERIENDA", imagen: null },
-      { id: "5", nombre: "CENA", imagen: null },
-    ],
-    [],
-  );
+  useEffect(() => {
+    cargarListas();
+  }, []);
 
-  const [listas, setListas] = useState(listasIniciales);
-  const [listaSeleccionadaId, setListaSeleccionadaId] = useState("");
-
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const pulsarCrearLista = () => setModalVisible(true);
-
-  const onSaveNewList = ({ nombre, imagen }) => {
-    const name = (nombre || "").trim().toUpperCase();
-    if (!name) return;
-
-    if (listas.some((l) => l.nombre === name)) {
-      Alert.alert("Esa lista ya existe");
-      return;
+  const cargarListas = async () => {
+    try {
+      const response = await fetch(`${API_URL}/listas/mine`);
+      const data = await response.json();
+      setListas(data);
+    } catch (error) {
+      console.log("Error cargando listas:", error);
     }
-
-    const nueva = {
-      id: String(Date.now()),
-      nombre: name,
-      imagen: imagen || null,
-    };
-    setListas((prev) => [...prev, nueva]);
-    setListaSeleccionadaId(nueva.id);
   };
 
-  const pulsarGuardar = () => {
-    if (!listaSeleccionadaId) {
-      Alert.alert("Selecciona una lista");
-      return;
-    }
+  const crearLista = async () => {
+    if (!nombreLista.trim()) return;
 
-    if (!receta) {
-      Alert.alert("Error", "No llegó la receta");
-      return;
-    }
+    try {
+      await fetch(`${API_URL}/listas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          nombre: nombreLista,
+        }),
+      });
 
-    navigation.navigate("RecetaFavorita", { recipe: receta });
+      setNombreLista("");
+      cargarListas();
+    } catch (error) {
+      console.log("Error creando lista:", error);
+    }
+  };
+
+  const añadirRecetaALista = async (listaId) => {
+    try {
+      await fetch(`${API_URL}/listas/${listaId}/recetas/${receta.id}`, {
+        method: "POST",
+      });
+
+      navigation.navigate("Favoritos");
+    } catch (error) {
+      console.log("Error añadiendo receta a lista:", error);
+    }
   };
 
   return (
-    <SafeAreaView style={styles.fondo}>
-      <View style={styles.contenedor}>
-        <View style={styles.header}>
-          <Text style={styles.marca}>RecetApp</Text>
-          <Pressable
-            onPress={() => navigation.goBack()}
-            style={styles.botonVolver}
-          >
-            <Text style={styles.flecha}>←</Text>
-          </Pressable>
-        </View>
+    <View style={{ padding: 20 }}>
+      <Text>Elige una lista</Text>
 
-        <Text style={styles.titulo}>Elegir lista para guardar</Text>
-        <Text style={styles.subtitulo}>
-          Elige la lista donde quieres guardar la receta:
-        </Text>
-
-        <FlatList
-          data={listas}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.lista}
-          renderItem={({ item }) => {
-            const selected = item.id === listaSeleccionadaId;
-
-            return (
-              <Pressable
-                onPress={() => setListaSeleccionadaId(item.id)}
-                style={[
-                  styles.pildoraBorde,
-                  selected ? styles.pildoraBordeSeleccionada : null,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.pildoraDentro,
-                    selected ? styles.pildoraDentroSeleccionada : null,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.textoPildora,
-                      selected ? styles.textoPildoraSeleccionada : null,
-                    ]}
-                  >
-                    {item.nombre}
-                  </Text>
-
-                  <View
-                    style={[
-                      styles.circuloImagen,
-                      selected ? styles.circuloImagenSeleccionada : null,
-                    ]}
-                  >
-                    {item.imagen ? (
-                      <Image
-                        source={{ uri: item.imagen }}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: 999,
-                        }}
-                      />
-                    ) : null}
-                  </View>
-                </View>
-              </Pressable>
-            );
-          }}
-        />
-
-        <View style={styles.zonaBotones}>
-          <Pressable onPress={pulsarGuardar} style={styles.botonInferior}>
-            <Text style={styles.textoBotonInferior}>Guardar</Text>
-          </Pressable>
-
-          <Pressable onPress={pulsarCrearLista} style={styles.botonInferior}>
-            <Text style={styles.textoBotonInferior}>Crear lista</Text>
-          </Pressable>
-        </View>
-      </View>
-
-      <ModalCrearLista
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSave={onSaveNewList}
+      <TextInput
+        placeholder="Nueva lista"
+        value={nombreLista}
+        onChangeText={setNombreLista}
+        style={{
+          borderWidth: 1,
+          padding: 10,
+          marginVertical: 10,
+        }}
       />
 
-      <BarraBusqueda currentRoute="Favoritos" />
-    </SafeAreaView>
+      <Button title="Crear lista" onPress={crearLista} />
+
+      <FlatList
+        data={listas}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => añadirRecetaALista(item.id)}>
+            <Text style={{ padding: 15 }}>{item.nombre}</Text>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 }
