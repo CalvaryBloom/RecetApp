@@ -15,17 +15,20 @@ import PerfilUsuario from "./src/screens/PerfilUsuario";
 import EditarUsuario from "./src/screens/EditarUsuario";
 import Favoritos from "./src/screens/Favoritos";
 
-
 import RecetaLista from "./src/screens/RecetaLista";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
 const Stack = createStackNavigator();
 
+// ... todos tus imports se mantienen igual
+
 export default function App() {
   const navigationRef = useNavigationContainerRef();
   const [currentRoute, setCurrentRoute] = useState("Inicio");
-  // Estado global del usuario
+
+  // --- AQUÍ ESTÁ EL CAMBIO: Declaramos las variables que faltaban ---
+  const [token, setToken] = useState(null);
   const [user, setUser] = useState({
     nombre: "Sergio",
     apellidos: "García",
@@ -33,6 +36,7 @@ export default function App() {
     password: "123456",
     alergias: "Ninguna",
   });
+  // -----------------------------------------------------------------
 
   const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario"];
   const mostrarBarra = rutasConBarra.includes(currentRoute);
@@ -51,35 +55,58 @@ export default function App() {
       onStateChange={actualizarRutaActual}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {/* IMPORTANTE
-          PARA QUE FUNCIONE CORRECTAMENTE LA NAVEGACION TIENE  QUE ESTAR AQUI TODAS LAS PANTALLAS
-        */}
         <Stack.Screen name="Inicio" component={RecetApp} />
-        <Stack.Screen name="Login" component={Login} />
+
+        {/* CORRECCIÓN EN EL LOGIN: Ahora setToken y setUser sí existen arriba */}
+        <Stack.Screen name="Login">
+          {(props) => (
+            <Login {...props} setToken={setToken} setUser={setUser} />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen name="Registro" component={Registro} />
         <Stack.Screen
           name="ContrasenyaOlvidada"
           component={ContrasenyaOlvidada}
         />
 
-        {/* OTRAS PANTALLAS */}
-        <Stack.Screen name="Home" component={Home} />
-        <Stack.Screen name="Favoritos" component={Favoritos} />
-        {/* Pasamos user y setUser */}
-        <Stack.Screen name="PerfilUsuario">
-          {(props) => <PerfilUsuario {...props} user={user} />}
+        <Stack.Screen name="Home">
+          {(props) => <Home {...props} token={token} user={user} />}
         </Stack.Screen>
-        <Stack.Screen name="EditarUsuario">
+
+        <Stack.Screen name="Favoritos" component={Favoritos} />
+
+        <Stack.Screen name="PerfilUsuario">
           {(props) => (
-            <EditarUsuario {...props} user={user} setUser={setUser} />
+            <PerfilUsuario
+              {...props}
+              user={user}
+              token={token}
+              setUser={setUser}
+            />
           )}
         </Stack.Screen>
+
+        <Stack.Screen name="EditarUsuario">
+          {(props) => (
+            <EditarUsuario
+              {...props}
+              user={user}
+              setUser={setUser}
+              token={token} // ESTE ES EL TOKEN QUE USA EL FETCH
+            />
+          )}
+        </Stack.Screen>
+
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
         <Stack.Screen name="ElegirLista" component={ElegirLista} />
         <Stack.Screen name="RecetaLista" component={RecetaLista} />
       </Stack.Navigator>
 
-      {mostrarBarra && <BarraBusqueda currentRoute={currentRoute} />}
+      {/* Pasamos el token a la barra para que lo mantenga vivo */}
+      {mostrarBarra && (
+        <BarraBusqueda currentRoute={currentRoute} token={token} user={user} />
+      )}
     </NavigationContainer>
   );
 }

@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import styles from "../styles/Home";
 
 // Cambiar la IP
-const API_URL = "http://192.168.0.235:8080/api/recetas";
+const API_URL = "http://192.168.1.140:8080/api/recetas";
 
 export default function Home({ navigation }) {
   const [recipes, setRecipes] = useState([]);

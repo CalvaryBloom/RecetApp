@@ -1,10 +1,53 @@
-import React, { Component } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react'; // 1. Importamos useState
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 
 const ContrasenyaOlvidada = (props) => {
+  // 2. Definimos los estados para el correo y la carga
+  const [correo, setCorreo] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleEnviar = async () => {
+  if (!correo.trim()) {
+    Alert.alert("Error", "Por favor, introduce tu correo electrónico.");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const response = await fetch('http://192.168.1.140:8080/api/usuarios/recuperar-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Asegúrate de NO enviar cabeceras de Authorization aquí
+      },
+      body: JSON.stringify({ correo: correo.trim().toLowerCase() }), 
+    });
+
+    console.log("Código de estado:", response.status);
+
+    if (response.ok) {
+      const texto = await response.text();
+      Alert.alert("Éxito", texto || "Si el correo existe, recibirás instrucciones pronto.", [
+        { text: "OK", onPress: () => props.navigation.goBack() }
+      ]);
+    } else {
+      if (response.status === 403) {
+        throw new Error("Acceso denegado (403). Revisa la configuración de Spring Security en el backend.");
+      }
+      
+      const errorBackend = await response.text();
+      throw new Error(errorBackend || "Error en el servidor (" + response.status + ")");
+    }
+  } catch (error) {
+    console.error("Error detallado:", error);
+    Alert.alert("Error de Conexión", error.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
   return (
     <View style={styles.container}>
-
       <Image
         source={require('../../assets/image1.png')}
         style={styles.logo}
@@ -20,16 +63,27 @@ const ContrasenyaOlvidada = (props) => {
         style={styles.input}
         placeholder="nombreapellido@gmail.com"
         keyboardType="email-address"
+        value={correo}
+        onChangeText={setCorreo} // 5. Actualizamos el estado al escribir
+        autoCapitalize="none"
       />
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>Enviar</Text>
+      <TouchableOpacity 
+        style={[styles.button, loading && { opacity: 0.7 }]} 
+        onPress={handleEnviar} // 6. Llamamos a la función
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="black" />
+        ) : (
+          <Text style={styles.buttonText}>Enviar</Text>
+        )}
       </TouchableOpacity>
-
     </View>
   );
 };
 
+// ... Tus estilos se mantienen exactamente igual
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -37,14 +91,12 @@ const styles = StyleSheet.create({
     padding: 30,
     justifyContent: 'center',
   },
-
   logo: {
     width: 320,
     height: 120,
     alignSelf: 'center',
     marginBottom: 30,
   },
-
   description: {
     textAlign: 'center',
     fontSize: 15,
@@ -53,14 +105,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     lineHeight: 22,
   },
-
   label: {
     fontSize: 14,
     color: '#444',
     marginBottom: 5,
     marginTop: 10,
   },
-
   input: {
     backgroundColor: '#fff',
     padding: 12,
@@ -68,18 +118,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
   },
-
   button: {
     backgroundColor: '#CCD5AE',
     paddingVertical: 14,
     borderRadius: 20,
     marginTop: 30,
   },
-
   buttonText: {
     textAlign: 'center',
     fontSize: 16,
     fontWeight: 'bold',
   },
 });
+
 export default ContrasenyaOlvidada;

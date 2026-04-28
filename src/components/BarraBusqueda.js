@@ -4,7 +4,8 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export default function BarraBusqueda({ currentRoute }) {
+// Recibimos token y user como props desde App.js
+export default function BarraBusqueda({ currentRoute, token, user }) {
   const navigation = useNavigation();
   const colorActivo = '#D4A373';
   const colorInactivo = '#F0F2E7';
@@ -15,8 +16,9 @@ export default function BarraBusqueda({ currentRoute }) {
   return (
     <View style={styles.container}>
 
+      {/* BOTÓN PERFIL: Ahora envía el token y user global */}
       <TouchableOpacity
-        onPress={() => navigation.navigate('PerfilUsuario')}
+        onPress={() => navigation.navigate('PerfilUsuario', { token: token, user: user })}
         accessibilityLabel="Ir a Perfil"
       >
         <MaterialIcons
@@ -27,14 +29,14 @@ export default function BarraBusqueda({ currentRoute }) {
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('Home', { token: token, user: user })}
         accessibilityLabel="Ir a Home"
       >
         <MaterialIcons name="home" size={28} color={obtenerColor('Home')} />
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate('Favoritos')}
+        onPress={() => navigation.navigate('Favoritos', { token: token })}
         accessibilityLabel="Ir a Favoritos"
       >
         <MaterialIcons

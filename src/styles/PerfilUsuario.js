@@ -1,20 +1,21 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: "#F5EEDC",
-    },
-    text: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#333',
-    },
-    imageContainer: {
+  container: {
+    flex: 1,
+    // CAMBIA 'center' por 'flex-start' para que el contenido suba
+    justifyContent: 'flex-start', 
+    alignItems: 'center', // Mantiene los elementos centrados horizontalmente
+    backgroundColor: "#F5EEDC",
+    paddingTop: 100, // Ajusta este número según prefieras (subir o bajar todo el bloque)
+  },
+  text: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  imageContainer: {
     alignItems: "center",
-    marginTop: 10,
     marginBottom: 15,
   },
   image: {

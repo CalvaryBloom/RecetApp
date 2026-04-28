@@ -1,33 +1,125 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StatusBar, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StatusBar,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import BarraBusqueda from '../components/BarraBusqueda';
-import styles from '../styles/PerfilUsuario';
+import BarraBusqueda from "../components/BarraBusqueda";
+import styles from "../styles/PerfilUsuario";
 
-export default function EditarUsuario({ navigation, user, setUser }) {
-  const [nombre, setNombre] = useState(user.nombre);
-  const [apellidos, setApellidos] = useState(user.apellidos);
-  const [correo, setCorreo] = useState(user.correo);
-  const [password, setPassword] = useState(user.password);
-  const [alergias, setAlergias] = useState(user.alergias);
+const API_URL_ME = "http://192.168.1.140:8080/api/usuarios/me";
+const API_URL_ALERGIAS = "http://192.168.1.140:8080/api/usuarios/me/alergias";
 
-  const actualizar = () => {
-    setUser({
-      nombre,
-      apellidos,
-      correo,
-      password,
-      alergias,
-    });
+export default function EditarUsuario({
+  navigation,
+  route,
+  setUser,
+  token: tokenProp,
+}) {
+  const token = tokenProp || route.params?.token;
+  const { user } = route.params || {};
 
-    navigation.goBack();
+  const [nombre, setNombre] = useState(user?.nombre || "");
+  const [apellidos, setApellidos] = useState(user?.apellidos || "");
+  const [correo, setCorreo] = useState(user?.correo || "");
+  const [password, setPassword] = useState("");
+  const [alergias, setAlergias] = useState(
+    Array.isArray(user?.alergias)
+      ? user.alergias.join(", ")
+      : user?.alergias || "",
+  );
+  const [loading, setLoading] = useState(false);
+
+  const actualizar = async () => {
+    if (!token) {
+      console.error("DEBUG: Token no encontrado en props ni en params");
+      Alert.alert(
+        "Error de Sesión",
+        "No se detectó una sesión activa. Por favor, cierra sesión y vuelve a entrar.",
+      );
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Actualizar datos básicos
+      const resMe = await fetch(API_URL_ME, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nombre, apellidos, correo }),
+      });
+
+      if (resMe.status === 401) {
+        throw new Error("Sesión caducada o token inválido.");
+      }
+
+      if (!resMe.ok) {
+        const errorMsg = await resMe.text();
+        throw new Error(errorMsg || "Error al actualizar datos básicos.");
+      }
+
+      const usuarioActualizado = await resMe.json();
+
+      // --- CAMBIO AQUÍ: LÓGICA DE ALERGIAS OPCIONALES ---
+      // Si el campo está vacío, enviamos un array vacío [] para que no de error
+      const listaAlergias =
+        alergias && alergias.trim().length > 0
+          ? alergias
+              .split(",")
+              .map((item) => item.trim())
+              .filter((i) => i !== "")
+          : [];
+
+      // 2. SOLO llamamos al endpoint de alergias si la lista NO está vacía
+      if (listaAlergias.length > 0) {
+        const resAlergias = await fetch(API_URL_ALERGIAS, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ alergias: listaAlergias }),
+        });
+
+        if (!resAlergias.ok) {
+          throw new Error("El servidor rechazó la lista de alergias.");
+        }
+
+        // Si funcionó, añadimos las alergias al objeto del estado global
+        usuarioActualizado.alergias = listaAlergias;
+      } else {
+        // Si la lista está vacía, le decimos al estado global que no hay alergias
+        usuarioActualizado.alergias = [];
+        console.log("No se enviaron alergias porque el campo está vacío.");
+      }
+      // 3. Sincronizar estado global
+      usuarioActualizado.alergias = listaAlergias;
+      if (setUser) setUser(usuarioActualizado);
+
+      Alert.alert("¡Hecho!", "Tu perfil ha sido actualizado.", [
+        { text: "OK", onPress: () => navigation.goBack() },
+      ]);
+    } catch (error) {
+      console.error("ERROR ACTUALIZAR:", error.message);
+      Alert.alert("Error", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EEDC" />
 
-      {/* Imagen superior */}
       <View style={styles.imageContainer}>
         <Image
           source={require("../../assets/image1.png")}
@@ -35,41 +127,68 @@ export default function EditarUsuario({ navigation, user, setUser }) {
         />
       </View>
 
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Editar Usuario</Text>
-
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back-outline" size={28} marginLeft={155} color="black" />
+          <Ionicons
+            name="arrow-back-outline"
+            size={28}
+            style={{ marginLeft: 155 }}
+            color="black"
+          />
         </TouchableOpacity>
       </View>
 
-      {/* Inputs */}
-      <Input label="NOMBRE" value={nombre} onChangeText={setNombre} />
-      <Input label="APELLIDOS" value={apellidos} onChangeText={setApellidos} />
-      <Input label="CORREO ELECTRÓNICO" value={correo} onChangeText={setCorreo} />
-      <Input label="CONTRASEÑA" value={password} secureTextEntry onChangeText={setPassword} />
-      <Input label="ALERGIAS O INGREDIENTES" value={alergias} onChangeText={setAlergias} />
+      <View style={styles.field}>
+        <Text style={styles.label}>NOMBRE</Text>
+        <TextInput
+          style={styles.input}
+          value={nombre}
+          onChangeText={setNombre}
+        />
+      </View>
 
-      {/* Botón actualizar */}
-      <TouchableOpacity style={styles.button} onPress={actualizar}>
-        <Text style={styles.buttonText}>Actualizar</Text>
+      <View style={styles.field}>
+        <Text style={styles.label}>APELLIDOS</Text>
+        <TextInput
+          style={styles.input}
+          value={apellidos}
+          onChangeText={setApellidos}
+        />
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.label}>CORREO ELECTRÓNICO</Text>
+        <TextInput
+          style={styles.input}
+          value={correo}
+          onChangeText={setCorreo}
+        />
+      </View>
+
+      <View style={styles.field}>
+        <Text style={styles.label}>ALERGIAS</Text>
+        <TextInput
+          style={styles.input}
+          value={alergias}
+          onChangeText={setAlergias}
+          placeholder="Ej: Lactosa, Gluten (opcional)"
+        />
+      </View>
+
+      <TouchableOpacity
+        style={[styles.button, loading && { opacity: 0.7 }]}
+        onPress={actualizar}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#000" />
+        ) : (
+          <Text style={styles.buttonText}>Actualizar</Text>
+        )}
       </TouchableOpacity>
-        <BarraBusqueda currentRoute="PerfilUsuario" />
-    </View>
-  );
-}
 
-function Input({ label, value, onChangeText, secureTextEntry }) {
-  return (
-    <View style={styles.field}>
-      <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChangeText}
-        secureTextEntry={secureTextEntry}
-      />
+      <BarraBusqueda currentRoute="PerfilUsuario" token={token} />
     </View>
   );
 }
