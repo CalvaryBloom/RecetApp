@@ -15,27 +15,7 @@ export default function RecetaBuscada(props) {
   const navigation = props.navigation;
   const route = props.route;
 
-  const recetaPorDefecto = {
-    title: "Receta",
-    image:
-      "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=60",
-    description: "Descripción no disponible.",
-    ingredients: ["1 ingrediente", "2 ingrediente", "3 ingrediente"],
-  };
-
-  let receta = recetaPorDefecto;
-
-  if (route && route.params && route.params.recipe) {
-    receta = route.params.recipe;
-  }
-
-  let ingredientes = recetaPorDefecto.ingredients;
-
-  if (receta.ingredients && Array.isArray(receta.ingredients)) {
-    if (receta.ingredients.length > 0) {
-      ingredientes = receta.ingredients;
-    }
-  }
+  const receta = route.params?.recipe;
 
   const [esFavorito, setEsFavorito] = useState(false);
 
@@ -47,11 +27,18 @@ export default function RecetaBuscada(props) {
     const nuevoEstado = !esFavorito;
     setEsFavorito(nuevoEstado);
 
-    //Solo navegar cuando se marca como favorito
     if (nuevoEstado) {
       navigation.navigate("ElegirLista", { receta });
     }
   }
+
+  // 🔴 Adaptamos nombres del backend
+  const titulo = receta?.titulo || "Sin título";
+  const imagen = receta?.imagenUrl;
+  const descripcion = receta?.descripcion;
+
+  // 🔥 IMPORTANTE: ingredientes vienen como objetos
+  const ingredientes = receta?.ingredientes || [];
 
   let iconoFavorito = esFavorito ? "heart" : "heart-outline";
   let colorFavorito = esFavorito ? "#FF4B4B" : "#666";
@@ -67,11 +54,7 @@ export default function RecetaBuscada(props) {
             resizeMode="contain"
           />
 
-          <TouchableOpacity
-            style={styles.iconButton}
-            onPress={volverAtras}
-            accessibilityLabel="Volver"
-          >
+          <TouchableOpacity style={styles.iconButton} onPress={volverAtras}>
             <Ionicons name="arrow-back-outline" size={26} color="#333" />
           </TouchableOpacity>
         </View>
@@ -80,12 +63,12 @@ export default function RecetaBuscada(props) {
 
         <View style={styles.chosenBar}>
           <Text style={styles.chosenText} numberOfLines={1}>
-            {receta.title}
+            {titulo}
           </Text>
           <Ionicons name="search-outline" size={20} color="#666" />
         </View>
 
-        <Text style={styles.title}>{receta.title}</Text>
+        <Text style={styles.title}>{titulo}</Text>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -93,16 +76,18 @@ export default function RecetaBuscada(props) {
         >
           {/* IMAGEN */}
           <View style={styles.imageWrapper}>
-            <Image source={{ uri: receta.image }} style={styles.image} />
+            <Image source={{ uri: imagen }} style={styles.image} />
 
             <TouchableOpacity
               style={styles.heartButton}
               onPress={cambiarFavorito}
-              accessibilityLabel="Marcar como favorito"
             >
               <Ionicons name={iconoFavorito} size={22} color={colorFavorito} />
             </TouchableOpacity>
           </View>
+
+          {/* DESCRIPCIÓN */}
+          <Text style={{ margin: 10 }}>{descripcion}</Text>
 
           {/* INGREDIENTES */}
           <View style={styles.ingredientsHeader}>
@@ -111,11 +96,15 @@ export default function RecetaBuscada(props) {
           </View>
 
           <View style={styles.ingredientsBox}>
-            {ingredientes.map((ingrediente, idx) => (
-              <Text key={idx} style={styles.ingredientItem}>
-                • {ingrediente}
-              </Text>
-            ))}
+            {ingredientes.length > 0 ? (
+              ingredientes.map((ing, idx) => (
+                <Text key={idx} style={styles.ingredientItem}>
+                  • {ing.nombre} {ing.cantidad} {ing.unidad}
+                </Text>
+              ))
+            ) : (
+              <Text>No hay ingredientes</Text>
+            )}
           </View>
 
           <View style={styles.bottomSpace} />
