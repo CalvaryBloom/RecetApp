@@ -4,14 +4,19 @@ import {
   useNavigationContainerRef,
 } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
+import RecetApp from "./src/screens/RecetApp";
 import Login from "./src/screens/Login";
 import Registro from "./src/screens/Registro";
 import ContrasenyaOlvidada from "./src/screens/ContrasenyaOlvidada";
 import Home from "./src/screens/Home";
-import Inicio from "./src/screens/Inicio";
-import Favoritos from "./src/screens/Favoritos";
-import PerfilUsuario from "./src/screens/PerfilUsuario";
 import RecetaBuscada from "./src/screens/RecetaBuscada";
+import ElegirLista from "./src/screens/ElegirLista";
+import PerfilUsuario from "./src/screens/PerfilUsuario";
+import EditarUsuario from "./src/screens/EditarUsuario";
+import Favoritos from "./src/screens/Favoritos";
+
+
+import RecetaLista from "./src/screens/RecetaLista";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
@@ -20,6 +25,14 @@ const Stack = createStackNavigator();
 export default function App() {
   const navigationRef = useNavigationContainerRef();
   const [currentRoute, setCurrentRoute] = useState("Inicio");
+  // Estado global del usuario
+  const [user, setUser] = useState({
+    nombre: "Sergio",
+    apellidos: "García",
+    correo: "sergio@example.com",
+    password: "123456",
+    alergias: "Ninguna",
+  });
 
   const rutasConBarra = ["Home", "Favoritos", "PerfilUsuario"];
   const mostrarBarra = rutasConBarra.includes(currentRoute);
@@ -41,7 +54,7 @@ export default function App() {
         {/* IMPORTANTE
           PARA QUE FUNCIONE CORRECTAMENTE LA NAVEGACION TIENE  QUE ESTAR AQUI TODAS LAS PANTALLAS
         */}
-        <Stack.Screen name="Inicio" component={Inicio} />
+        <Stack.Screen name="Inicio" component={RecetApp} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Registro" component={Registro} />
         <Stack.Screen
@@ -52,8 +65,18 @@ export default function App() {
         {/* OTRAS PANTALLAS */}
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Favoritos" component={Favoritos} />
-        <Stack.Screen name="PerfilUsuario" component={PerfilUsuario} />
+        {/* Pasamos user y setUser */}
+        <Stack.Screen name="PerfilUsuario">
+          {(props) => <PerfilUsuario {...props} user={user} />}
+        </Stack.Screen>
+        <Stack.Screen name="EditarUsuario">
+          {(props) => (
+            <EditarUsuario {...props} user={user} setUser={setUser} />
+          )}
+        </Stack.Screen>
         <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
+        <Stack.Screen name="ElegirLista" component={ElegirLista} />
+        <Stack.Screen name="RecetaLista" component={RecetaLista} />
       </Stack.Navigator>
 
       {mostrarBarra && <BarraBusqueda currentRoute={currentRoute} />}

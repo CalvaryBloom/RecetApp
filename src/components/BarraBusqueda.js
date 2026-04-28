@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: '#CCD5AE',
     justifyContent: 'space-around',
-    paddingVertical: 12,
+    paddingVertical: 42,
     position: 'absolute',
     bottom: 0,
     width: '100%',

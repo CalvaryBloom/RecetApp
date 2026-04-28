@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import styles from '../styles/Inicio';
+import styles from '../styles/RecetApp';
 
 class Inicio extends Component {
   render() {
