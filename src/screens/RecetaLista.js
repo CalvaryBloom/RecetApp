@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,21 +6,42 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
-  Pressable
+  Pressable,
+  ActivityIndicator
 } from "react-native";
+import { API_BASE_URL } from "../services/service";
 
-export default function DesayunoScreen() {
+export default function RecetaLista({ route, navigation, token }) {
+  const { listaId, listaNombre } = route.params || {};
+  const [recetas, setRecetas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const meals = [
-    {
-      title: "TOSTADAS CON TOMATE Y JAMÓN",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc4XY7qI2l_ohuHrK7HTc8DQTJ5eLYyAeb1w&s"
-    },
-    {
-      title: "TOSTADAS AGUACATE",
-      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5AcZXS09njuYqfHRcQqRTytiCH5e1Xm09lA&s"
+  useEffect(() => {
+    if (listaId) {
+      fetchRecetas();
     }
-  ];
+  }, [listaId, token]);
+
+  const fetchRecetas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/listas/${listaId}/recetas`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRecetas(data);
+      } else {
+        console.error("Error fetching recetas", response.status);
+      }
+    } catch (error) {
+      console.error("Error de red", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,22 +52,34 @@ export default function DesayunoScreen() {
             source={require('../../assets/image1.png')}
             style={styles.logo}
         />
-        <Pressable>
+        <Pressable onPress={() => navigation.goBack()}>
           <Text style={styles.back}>←</Text>
         </Pressable>
       </View>
 
       {/* Title */}
-      <Text style={styles.categoryTitle}>DESAYUNO</Text>
+      <Text style={styles.categoryTitle}>{listaNombre || "LISTA"}</Text>
 
       {/* Content */}
       <ScrollView contentContainerStyle={styles.scroll}>
-        {meals.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <Text style={styles.mealTitle}>{item.title}</Text>
-            <Image source={{ uri: item.image }} style={styles.image} />
-          </View>
-        ))}
+        {loading ? (
+            <ActivityIndicator size="large" color="#D18B47" style={{marginTop: 50}} />
+        ) : recetas.length === 0 ? (
+            <Text style={{textAlign: "center", marginTop: 20}}>No hay recetas en esta lista.</Text>
+        ) : (
+            recetas.map((item, index) => (
+            <View key={String(item.recetaId || index)} style={styles.card}>
+                <Text style={styles.mealTitle}>{item.titulo}</Text>
+                {item.imagenUrl ? (
+                    <Image source={{ uri: item.imagenUrl }} style={styles.image} />
+                ) : (
+                    <View style={[styles.image, { backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text>Sin imagen</Text>
+                    </View>
+                )}
+            </View>
+            ))
+        )}
       </ScrollView>
 
     </SafeAreaView>
@@ -68,20 +101,24 @@ const styles = StyleSheet.create({
   },
 
   logo: {
-    color: "#D18B47",
-    fontWeight: "bold"
+    width: 150,
+    height: 60,
+    resizeMode: 'contain'
   },
 
   back: {
-    fontSize: 20,
-    color: "#8A6F4D"
+    fontSize: 25,
+    color: "#8A6F4D",
+    paddingHorizontal: 10
   },
 
   categoryTitle: {
     textAlign: "center",
     fontWeight: "bold",
     color: "#8A6F4D",
-    marginBottom: 15
+    marginBottom: 15,
+    fontSize: 18,
+    textTransform: 'uppercase'
   },
 
   scroll: {
@@ -97,7 +134,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontWeight: "bold",
     color: "#B79B6C",
-    marginBottom: 10
+    marginBottom: 10,
+    textTransform: 'uppercase'
   },
 
   image: {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,25 +10,72 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import BarraBusqueda from "../components/BarraBusqueda";
 import styles from "../styles/RecetaBuscada";
+import { API_BASE_URL } from "../services/service";
 
 export default function RecetaBuscada(props) {
   const navigation = props.navigation;
   const route = props.route;
+  const token = props.token;
 
   const receta = route.params?.recipe;
 
   const [esFavorito, setEsFavorito] = useState(false);
 
+  useEffect(() => {
+    if (receta?.id && token) {
+      checkFavorito();
+    }
+  }, [receta?.id, token]);
+
+  const checkFavorito = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/favoritos/isFavorite/${receta.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const isFav = await res.json();
+        setEsFavorito(isFav);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   function volverAtras() {
     navigation.goBack();
   }
 
-  function cambiarFavorito() {
-    const nuevoEstado = !esFavorito;
-    setEsFavorito(nuevoEstado);
+  async function cambiarFavorito() {
+    if (!receta?.id || !token) {
+        // Fallback for testing without token
+        const nuevoEstado = !esFavorito;
+        setEsFavorito(nuevoEstado);
+        if (nuevoEstado) {
+          navigation.navigate("ElegirLista", { receta });
+        }
+        return;
+    }
 
-    if (nuevoEstado) {
-      navigation.navigate("ElegirLista", { receta });
+    const nuevoEstado = !esFavorito;
+    setEsFavorito(nuevoEstado); // Optimistic UI
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/favoritos/toggle/${receta.id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        if (nuevoEstado) {
+          navigation.navigate("ElegirLista", { receta });
+        }
+      } else {
+        // Revert on failure
+        setEsFavorito(!nuevoEstado);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite", error);
+      setEsFavorito(!nuevoEstado);
     }
   }
 
@@ -111,7 +158,7 @@ export default function RecetaBuscada(props) {
         </ScrollView>
       </View>
 
-      <BarraBusqueda currentRoute="Home" />
+      <BarraBusqueda currentRoute="Home" token={token} />
     </SafeAreaView>
   );
 }

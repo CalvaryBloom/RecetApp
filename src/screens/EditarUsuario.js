@@ -12,9 +12,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import BarraBusqueda from "../components/BarraBusqueda";
 import styles from "../styles/PerfilUsuario";
+import { API_BASE_URL } from "../services/service";
 
-const API_URL_ME = "http://192.168.1.140:8080/api/usuarios/me";
-const API_URL_ALERGIAS = "http://192.168.1.140:8080/api/usuarios/me/alergias";
+const API_URL_ME = `${API_BASE_URL}/usuarios/me`;
+const API_URL_ALERGIAS = `${API_BASE_URL}/usuarios/me/alergias`;
 
 export default function EditarUsuario({
   navigation,

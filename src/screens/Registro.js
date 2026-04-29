@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicato
 
 // Importamos tus estilos originales
 import styles from '../styles/Registro';
+import { API_BASE_URL } from '../services/service';
 
 export default function Registro({ navigation }) {
   // Estados para capturar lo que el usuario escribe
@@ -23,7 +24,7 @@ export default function Registro({ navigation }) {
       setLoading(true);
 
       // Petición POST según el punto 1 de tu documentación
-      const response = await fetch('http://192.168.1.140:8080/api/usuarios/register', {
+      const response = await fetch(`${API_BASE_URL}/usuarios/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

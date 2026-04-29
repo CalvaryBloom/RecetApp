@@ -12,11 +12,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import styles from "../styles/Home";
+import { API_BASE_URL } from "../services/service";
 
-// Cambiar la IP
-const API_URL = "http://192.168.1.140:8080/api/recetas";
 
-export default function Home({ navigation }) {
+const API_URL = `${API_BASE_URL}/recetas`;
+
+export default function Home({ navigation, token }) {
   const [recipes, setRecipes] = useState([]);
   const [availableFilters, setAvailableFilters] = useState([]);
   const [searchText, setSearchText] = useState("");

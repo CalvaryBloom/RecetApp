@@ -74,7 +74,9 @@ export default function App() {
           {(props) => <Home {...props} token={token} user={user} />}
         </Stack.Screen>
 
-        <Stack.Screen name="Favoritos" component={Favoritos} />
+        <Stack.Screen name="Favoritos">
+          {(props) => <Favoritos {...props} token={token} />}
+        </Stack.Screen>
 
         <Stack.Screen name="PerfilUsuario">
           {(props) => (
@@ -98,9 +100,15 @@ export default function App() {
           )}
         </Stack.Screen>
 
-        <Stack.Screen name="RecetaBuscada" component={RecetaBuscada} />
-        <Stack.Screen name="ElegirLista" component={ElegirLista} />
-        <Stack.Screen name="RecetaLista" component={RecetaLista} />
+        <Stack.Screen name="RecetaBuscada">
+          {(props) => <RecetaBuscada {...props} token={token} />}
+        </Stack.Screen>
+        <Stack.Screen name="ElegirLista">
+          {(props) => <ElegirLista {...props} token={token} />}
+        </Stack.Screen>
+        <Stack.Screen name="RecetaLista">
+          {(props) => <RecetaLista {...props} token={token} />}
+        </Stack.Screen>
       </Stack.Navigator>
 
       {/* Pasamos el token a la barra para que lo mantenga vivo */}

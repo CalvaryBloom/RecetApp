@@ -10,8 +10,9 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import BarraBusqueda from "../components/BarraBusqueda";
 import styles from "../styles/PerfilUsuario";
+import { API_BASE_URL } from "../services/service";
 
-const API_URL = "http://192.168.1.140:8080/api/usuarios/me";
+const API_URL = `${API_BASE_URL}/usuarios/me`;
 
 // Recibimos props y route
 export default function PerfilUsuario({ navigation, route, ...props }) {

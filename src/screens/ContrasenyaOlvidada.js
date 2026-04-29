@@ -1,5 +1,6 @@
 import React, { useState } from 'react'; // 1. Importamos useState
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
+import { API_BASE_URL } from '../services/service';
 
 const ContrasenyaOlvidada = (props) => {
   // 2. Definimos los estados para el correo y la carga
@@ -14,7 +15,7 @@ const ContrasenyaOlvidada = (props) => {
 
   setLoading(true);
   try {
-    const response = await fetch('http://192.168.1.140:8080/api/usuarios/recuperar-password', {
+    const response = await fetch(`${API_BASE_URL}/usuarios/recuperar-password`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

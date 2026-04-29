@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,17 +6,44 @@ import {
   SafeAreaView,
   ScrollView,
   Pressable,
-  Image
+  Image,
+  ActivityIndicator
 } from "react-native";
+import { API_BASE_URL } from "../services/service";
+import BarraBusqueda from "../components/BarraBusqueda";
 
-export default function FavoritosScreen() {
-  const categories = [
-    { title: "DESAYUNO", image: "https://cdn-icons-png.flaticon.com/512/1046/1046784.png" },
-    { title: "ALMUERZO", image: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" },
-    { title: "COMIDA", image: "https://cdn-icons-png.flaticon.com/512/3480/3480823.png" },
-    { title: "MERIENDA", image: "https://cdn-icons-png.flaticon.com/512/135/135620.png" },
-    { title: "CENA", image: "https://cdn-icons-png.flaticon.com/512/2922/2922037.png" }
-  ];
+export default function FavoritosScreen({ navigation, token }) {
+  const [listas, setListas] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchListas();
+    });
+    fetchListas();
+    return unsubscribe;
+  }, [navigation, token]);
+
+  const fetchListas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/listas/mine`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setListas(data);
+      } else {
+        console.error("Error fetching listas", response.status);
+      }
+    } catch (error) {
+      console.error("Error de red", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -28,7 +55,7 @@ export default function FavoritosScreen() {
                 style={styles.logo}
         />
 
-        <Text style={styles.title}>LISTA FAVORITOS</Text>
+        <Text style={styles.title}>MIS LISTAS</Text>
 
         <Pressable style={styles.selectButton}>
           <Text style={styles.selectText}>SELECCIONAR</Text>
@@ -38,20 +65,37 @@ export default function FavoritosScreen() {
 
       {/* Lista */}
       <ScrollView contentContainerStyle={styles.list}>
-        {categories.map((item, index) => (
-          <CategoryItem key={index} title={item.title} image={item.image} />
-        ))}
+        {loading ? (
+           <ActivityIndicator size="large" color="#D18B47" style={{marginTop: 50}} />
+        ) : listas.length === 0 ? (
+           <Text style={{textAlign: 'center', marginTop: 30}}>No tienes listas creadas.</Text>
+        ) : (
+           listas.map((item, index) => (
+             <CategoryItem 
+                key={String(item.id)} 
+                title={item.nombre} 
+                image={item.imagenUrl} 
+                onPress={() => navigation.navigate("RecetaLista", { listaId: item.id, listaNombre: item.nombre })}
+             />
+           ))
+        )}
       </ScrollView>
+
+      <BarraBusqueda currentRoute="Favoritos" token={token} />
     </SafeAreaView>
   );
 }
 
 /* Componente reutilizable */
-function CategoryItem({ title, image }) {
+function CategoryItem({ title, image, onPress }) {
   return (
-    <Pressable style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress}>
       <Text style={styles.cardText}>{title}</Text>
-      <Image source={{ uri: image }} style={styles.cardImage} />
+      {image ? (
+        <Image source={{ uri: image }} style={styles.cardImage} />
+      ) : (
+        <View style={styles.cardImage} /> 
+      )}
     </Pressable>
   );
 }

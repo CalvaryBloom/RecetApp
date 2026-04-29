@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,63 +7,128 @@ import {
   Alert,
   SafeAreaView,
   Image,
+  ActivityIndicator
 } from "react-native";
 
 import styles from "../styles/RecetaLista";
 import BarraBusqueda from "../components/BarraBusqueda";
 import ModalCrearLista from "../components/ModalCrearLista";
+import { API_BASE_URL } from "../services/service";
 
-export default function ElegirLista({ route, navigation }) {
+const defaultImages = [
+    "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
+    "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
+    "https://cdn-icons-png.flaticon.com/512/3480/3480823.png",
+    "https://cdn-icons-png.flaticon.com/512/135/135620.png",
+    "https://cdn-icons-png.flaticon.com/512/2922/2922037.png"
+];
+
+export default function ElegirLista({ route, navigation, token }) {
   const { receta } = route.params;
 
-  const listasIniciales = useMemo(
-    () => [
-      { id: "1", nombre: "DESAYUNO", imagen: null },
-      { id: "2", nombre: "ALMUERZO", imagen: null },
-      { id: "3", nombre: "COMIDA", imagen: null },
-      { id: "4", nombre: "MERIENDA", imagen: null },
-      { id: "5", nombre: "CENA", imagen: null },
-    ],
-    [],
-  );
-
-  const [listas, setListas] = useState(listasIniciales);
+  const [listas, setListas] = useState([]);
   const [listaSeleccionadaId, setListaSeleccionadaId] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetchListas();
+  }, []);
+
+  const fetchListas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/listas/mine`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setListas(data);
+      } else {
+        console.error("Error fetching listas", response.status);
+      }
+    } catch (error) {
+      console.error("Error de red", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const pulsarCrearLista = () => setModalVisible(true);
 
-  const onSaveNewList = ({ nombre, imagen }) => {
+  const onSaveNewList = async ({ nombre, imagen }) => {
     const name = (nombre || "").trim().toUpperCase();
     if (!name) return;
 
-    if (listas.some((l) => l.nombre === name)) {
+    if (listas.some((l) => l.nombre.toUpperCase() === name)) {
       Alert.alert("Esa lista ya existe");
       return;
     }
 
-    const nueva = {
-      id: String(Date.now()),
-      nombre: name,
-      imagen: imagen || null,
-    };
+    const imagenFinal = imagen || defaultImages[Math.floor(Math.random() * defaultImages.length)];
 
-    setListas((prev) => [...prev, nueva]);
-    setListaSeleccionadaId(nueva.id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/listas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          nombre: name,
+          imagenUrl: imagenFinal
+        })
+      });
+
+      if (response.ok) {
+        const nueva = await response.json();
+        setListas((prev) => [...prev, nueva]);
+        setListaSeleccionadaId(nueva.id);
+      } else {
+        const text = await response.text();
+        Alert.alert("Error al crear", text);
+      }
+    } catch (error) {
+      Alert.alert("Error de conexión", error.message);
+    }
   };
 
-  const pulsarGuardar = () => {
+  const pulsarGuardar = async () => {
     if (!listaSeleccionadaId) {
       Alert.alert("Selecciona una lista");
       return;
     }
 
-    if (!receta) {
-      Alert.alert("Error", "No llegó la receta");
+    if (!receta || !receta.id) {
+      Alert.alert("Error", "No llegó el ID de la receta");
       return;
     }
 
-    navigation.navigate("RecetaFavorita", { recipe: receta });
+    try {
+      setSaving(true);
+      const response = await fetch(`${API_BASE_URL}/listas/${listaSeleccionadaId}/recetas/${receta.id}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        Alert.alert("¡Éxito!", "Receta guardada en la lista", [
+            { text: "Ver mis listas", onPress: () => navigation.navigate("Favoritos") }
+        ]);
+      } else {
+        const text = await response.text();
+        Alert.alert("Error al guardar", text);
+      }
+    } catch (error) {
+      Alert.alert("Error de conexión", error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -84,62 +149,67 @@ export default function ElegirLista({ route, navigation }) {
           Elige la lista donde quieres guardar la receta:
         </Text>
 
-        <FlatList
-          data={listas}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.lista}
-          renderItem={({ item }) => {
-            const selected = item.id === listaSeleccionadaId;
+        {loading ? (
+            <ActivityIndicator size="large" color="#D18B47" style={{marginTop: 50}} />
+        ) : (
+            <FlatList
+            data={listas}
+            keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={styles.lista}
+            ListEmptyComponent={<Text style={{textAlign: "center", marginTop: 20}}>No tienes listas creadas.</Text>}
+            renderItem={({ item }) => {
+                const selected = item.id === listaSeleccionadaId;
 
-            return (
-              <Pressable
-                onPress={() => setListaSeleccionadaId(item.id)}
-                style={[
-                  styles.pildoraBorde,
-                  selected ? styles.pildoraBordeSeleccionada : null,
-                ]}
-              >
-                <View
-                  style={[
-                    styles.pildoraDentro,
-                    selected ? styles.pildoraDentroSeleccionada : null,
-                  ]}
+                return (
+                <Pressable
+                    onPress={() => setListaSeleccionadaId(item.id)}
+                    style={[
+                    styles.pildoraBorde,
+                    selected ? styles.pildoraBordeSeleccionada : null,
+                    ]}
                 >
-                  <Text
+                    <View
                     style={[
-                      styles.textoPildora,
-                      selected ? styles.textoPildoraSeleccionada : null,
+                        styles.pildoraDentro,
+                        selected ? styles.pildoraDentroSeleccionada : null,
                     ]}
-                  >
-                    {item.nombre}
-                  </Text>
+                    >
+                    <Text
+                        style={[
+                        styles.textoPildora,
+                        selected ? styles.textoPildoraSeleccionada : null,
+                        ]}
+                    >
+                        {item.nombre}
+                    </Text>
 
-                  <View
-                    style={[
-                      styles.circuloImagen,
-                      selected ? styles.circuloImagenSeleccionada : null,
-                    ]}
-                  >
-                    {item.imagen ? (
-                      <Image
-                        source={{ uri: item.imagen }}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          borderRadius: 999,
-                        }}
-                      />
-                    ) : null}
-                  </View>
-                </View>
-              </Pressable>
-            );
-          }}
-        />
+                    <View
+                        style={[
+                        styles.circuloImagen,
+                        selected ? styles.circuloImagenSeleccionada : null,
+                        ]}
+                    >
+                        {item.imagenUrl ? (
+                        <Image
+                            source={{ uri: item.imagenUrl }}
+                            style={{
+                            width: "100%",
+                            height: "100%",
+                            borderRadius: 999,
+                            }}
+                        />
+                        ) : null}
+                    </View>
+                    </View>
+                </Pressable>
+                );
+            }}
+            />
+        )}
 
         <View style={styles.zonaBotones}>
-          <Pressable onPress={pulsarGuardar} style={styles.botonInferior}>
-            <Text style={styles.textoBotonInferior}>Guardar</Text>
+          <Pressable onPress={pulsarGuardar} style={styles.botonInferior} disabled={saving || loading}>
+            <Text style={styles.textoBotonInferior}>{saving ? "Guardando..." : "Guardar"}</Text>
           </Pressable>
 
           <Pressable onPress={pulsarCrearLista} style={styles.botonInferior}>
@@ -154,7 +224,7 @@ export default function ElegirLista({ route, navigation }) {
         onSave={onSaveNewList}
       />
 
-      <BarraBusqueda currentRoute="Favoritos" />
+      <BarraBusqueda currentRoute="Favoritos" token={token} />
     </SafeAreaView>
   );
 }

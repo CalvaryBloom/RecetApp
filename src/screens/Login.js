@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
+import { API_BASE_URL } from '../services/service';
 
 export default class Login extends Component {
   constructor(props) {
@@ -22,7 +23,7 @@ export default class Login extends Component {
     try {
       this.setState({ loading: true });
 
-      const response = await fetch('http://192.168.1.140:8080/api/usuarios/login', {
+      const response = await fetch(`${API_BASE_URL}/usuarios/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
