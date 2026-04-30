@@ -19,6 +19,7 @@ const API_URL = `${API_BASE_URL}/recetas`;
 
 export default function Home({ navigation, token }) {
   const [recipes, setRecipes] = useState([]);
+  const [favoritos, setFavoritos] = useState([]);
   const [availableFilters, setAvailableFilters] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -28,12 +29,19 @@ export default function Home({ navigation, token }) {
   // Cargar datos al iniciar
   useEffect(() => {
     fetchRecetas();
+    fetchFavoritos();
   }, []);
 
   const fetchRecetas = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/getAll`);
+      const response = await fetch(`${API_URL}/getAll`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+
+      })
       const data = await response.json();
 
       setRecipes(data);
@@ -46,6 +54,29 @@ export default function Home({ navigation, token }) {
       });
 
       setAvailableFilters(Array.from(tagsUnicos));
+    } catch (error) {
+      console.error("Error conectando con el backend:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchFavoritos = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/favoritos/getMine`, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+
+      })
+      const data = await response.json();
+
+      setFavoritos(data);
+
+
+
     } catch (error) {
       console.error("Error conectando con el backend:", error);
     } finally {
@@ -80,6 +111,28 @@ export default function Home({ navigation, token }) {
     ejecutarBusqueda(searchText, nuevosFiltros);
   };
 
+  const anyadirFavorito = async (receta) => {
+    console.log(receta)
+    try {
+      const response = await fetch(`${API_BASE_URL}/favoritos/add/${receta.id}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+
+      })
+    } catch (error) {
+      console.error("Error toggling favorite", error);
+      setEsFavorito(!nuevoEstado);
+    } finally {
+      fetchFavoritos()
+    }
+  }
+  
+  const esFavorito = (recetaId) => {
+    return favoritos.some((fav) => fav.recetaId === recetaId)
+  }
+
   const renderRecipeCard = ({ item }) => (
     <TouchableOpacity
       activeOpacity={0.9}
@@ -91,8 +144,9 @@ export default function Home({ navigation, token }) {
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>{item.titulo}</Text>
-            <TouchableOpacity>
-              <Ionicons name="heart-outline" size={24} color="#FF4B4B" />
+            <TouchableOpacity onPress={(e) => anyadirFavorito(item)}>
+              
+              <Ionicons name={esFavorito(item.id) ? "heart" : "heart-outline"} size={24} color="#FF4B4B" />
             </TouchableOpacity>
           </View>
           <Text style={styles.cardDescription} numberOfLines={2}>
@@ -179,7 +233,7 @@ export default function Home({ navigation, token }) {
                     style={[
                       styles.filterChipText,
                       activeFilters.includes(filter) &&
-                        styles.filterChipTextActive,
+                      styles.filterChipTextActive,
                     ]}
                   >
                     {filter}
@@ -219,3 +273,5 @@ export default function Home({ navigation, token }) {
     </SafeAreaView>
   );
 }
+
+
