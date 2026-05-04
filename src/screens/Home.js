@@ -30,7 +30,7 @@ export default function Home({ navigation, token }) {
   useEffect(() => {
     fetchRecetas();
     fetchFavoritos();
-  }, []);
+  }, [token]);
 
   const fetchRecetas = async () => {
     try {
@@ -112,22 +112,74 @@ export default function Home({ navigation, token }) {
   };
 
   const anyadirFavorito = async (receta) => {
-    console.log(receta)
+    if (!receta?.id || !token) {
+      return;
+    }
+
+    const favoritoActual = esFavorito(receta.id);
+
     try {
-      const response = await fetch(`${API_BASE_URL}/favoritos/add/${receta.id}`, {
+      const response = await fetch(`${API_BASE_URL}/favoritos/toggle/${receta.id}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`
         }
+      });
 
-      })
+      if (!response.ok) {
+        throw new Error(`Error ${response.status} al actualizar favorito`);
+      }
+
+      // Si acaba de marcarla como favorita, va directo a elegir lista.
+      if (!favoritoActual) {
+        navigation.navigate("ElegirLista", { receta });
+      } else {
+        await quitarRecetaDeTodasLasListas(receta.id);
+      }
     } catch (error) {
-      console.error("Error toggling favorite", error);
-      setEsFavorito(!nuevoEstado);
+      console.error("Error actualizando favorito:", error);
     } finally {
-      fetchFavoritos()
+      fetchFavoritos();
     }
-  }
+  };
+
+  const obtenerIdRecetaEnItem = (item) =>
+    item?.recetaId ?? item?.idReceta ?? item?.receta?.id ?? item?.id ?? null;
+
+  const quitarRecetaDeTodasLasListas = async (recetaId) => {
+    if (!recetaId || !token) return;
+
+    try {
+      const listasRes = await fetch(`${API_BASE_URL}/listas/mine`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!listasRes.ok) return;
+
+      const listas = await listasRes.json();
+      if (!Array.isArray(listas) || listas.length === 0) return;
+
+      for (const lista of listas) {
+        const recetasRes = await fetch(`${API_BASE_URL}/listas/${lista.id}/recetas`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!recetasRes.ok) continue;
+
+        const recetasLista = await recetasRes.json();
+        const existe = Array.isArray(recetasLista)
+          ? recetasLista.some((item) => String(obtenerIdRecetaEnItem(item)) === String(recetaId))
+          : false;
+
+        if (!existe) continue;
+
+        await fetch(`${API_BASE_URL}/listas/${lista.id}/recetas/${recetaId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (error) {
+      console.error("Error quitando receta de listas:", error);
+    }
+  };
   
   const esFavorito = (recetaId) => {
     return favoritos.some((fav) => fav.recetaId === recetaId)
@@ -144,7 +196,12 @@ export default function Home({ navigation, token }) {
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>{item.titulo}</Text>
-            <TouchableOpacity onPress={(e) => anyadirFavorito(item)}>
+            <TouchableOpacity
+              onPress={(e) => {
+                e?.stopPropagation?.();
+                anyadirFavorito(item);
+              }}
+            >
               
               <Ionicons name={esFavorito(item.id) ? "heart" : "heart-outline"} size={24} color="#FF4B4B" />
             </TouchableOpacity>

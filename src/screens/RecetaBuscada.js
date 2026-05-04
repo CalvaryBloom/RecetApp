@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BarraBusqueda from "../components/BarraBusqueda";
@@ -15,21 +16,88 @@ import { API_BASE_URL } from "../services/service";
 export default function RecetaBuscada(props) {
   const navigation = props.navigation;
   const route = props.route;
-  const token = props.token;
+  const token = props.token || route.params?.token || null;
 
-  const receta = route.params?.recipe;
+  const recetaParam = route.params?.recipe;
+  const recetaId =
+    route.params?.recipeId ??
+    recetaParam?.id ??
+    recetaParam?.recetaId ??
+    recetaParam?.idReceta ??
+    null;
+
+  const [receta, setReceta] = useState(recetaParam || null);
+  const [loadingReceta, setLoadingReceta] = useState(!recetaParam && !!recetaId);
 
   const [esFavorito, setEsFavorito] = useState(false);
 
   useEffect(() => {
-    if (receta?.id && token) {
+    if (recetaId) {
+      fetchRecetaCompleta();
+    }
+  }, [recetaId, token]);
+
+  useEffect(() => {
+    if (recetaId && token) {
       checkFavorito();
     }
-  }, [receta?.id, token]);
+  }, [recetaId, token]);
+
+  const fetchRecetaCompleta = async () => {
+    if (!recetaId) return;
+
+    try {
+      setLoadingReceta(true);
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await fetch(`${API_BASE_URL}/recetas/${recetaId}`, {
+        headers,
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setReceta(data);
+      } else if (response.status === 403) {
+        // Fallback: algunos usuarios no tienen permiso en /recetas/:id,
+        // pero sí pueden ver la receta dentro del listado general.
+        await fetchRecetaDesdeListado();
+      } else {
+        console.error("Error cargando receta completa:", response.status);
+      }
+    } catch (error) {
+      console.error("Error de red cargando receta:", error);
+    } finally {
+      setLoadingReceta(false);
+    }
+  };
+
+  const fetchRecetaDesdeListado = async () => {
+    try {
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const response = await fetch(`${API_BASE_URL}/recetas/getAll`, { headers });
+
+      if (!response.ok) {
+        console.error("Error cargando listado para fallback:", response.status);
+        return;
+      }
+
+      const data = await response.json();
+      const recetaEncontrada = Array.isArray(data)
+        ? data.find((item) => String(item.id) === String(recetaId))
+        : null;
+
+      if (recetaEncontrada) {
+        setReceta(recetaEncontrada);
+      } else {
+        console.error("No se encontró la receta en fallback getAll");
+      }
+    } catch (error) {
+      console.error("Error en fallback de receta:", error);
+    }
+  };
 
   const checkFavorito = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/favoritos/isFavorite/${receta.id}`, {
+      const res = await fetch(`${API_BASE_URL}/favoritos/isFavorite/${recetaId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {
@@ -41,12 +109,50 @@ export default function RecetaBuscada(props) {
     }
   };
 
+  const obtenerIdRecetaEnItem = (item) =>
+    item?.recetaId ?? item?.idReceta ?? item?.receta?.id ?? item?.id ?? null;
+
+  const quitarRecetaDeTodasLasListas = async () => {
+    if (!recetaId || !token) return;
+
+    try {
+      const listasRes = await fetch(`${API_BASE_URL}/listas/mine`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!listasRes.ok) return;
+
+      const listas = await listasRes.json();
+      if (!Array.isArray(listas) || listas.length === 0) return;
+
+      for (const lista of listas) {
+        const recetasRes = await fetch(`${API_BASE_URL}/listas/${lista.id}/recetas`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!recetasRes.ok) continue;
+
+        const recetasLista = await recetasRes.json();
+        const existe = Array.isArray(recetasLista)
+          ? recetasLista.some((item) => String(obtenerIdRecetaEnItem(item)) === String(recetaId))
+          : false;
+
+        if (!existe) continue;
+
+        await fetch(`${API_BASE_URL}/listas/${lista.id}/recetas/${recetaId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (error) {
+      console.error("Error quitando receta de listas:", error);
+    }
+  };
+
   function volverAtras() {
     navigation.goBack();
   }
 
   async function cambiarFavorito() {
-    if (!receta?.id || !token) {
+    if (!recetaId || !token) {
         // Fallback for testing without token
         const nuevoEstado = !esFavorito;
         setEsFavorito(nuevoEstado);
@@ -60,7 +166,7 @@ export default function RecetaBuscada(props) {
     setEsFavorito(nuevoEstado); // Optimistic UI
 
     try {
-      const res = await fetch(`${API_BASE_URL}/favoritos/toggle/${receta.id}`, {
+      const res = await fetch(`${API_BASE_URL}/favoritos/toggle/${recetaId}`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -68,6 +174,8 @@ export default function RecetaBuscada(props) {
       if (res.ok) {
         if (nuevoEstado) {
           navigation.navigate("ElegirLista", { receta });
+        } else {
+          await quitarRecetaDeTodasLasListas();
         }
       } else {
         // Revert on failure
@@ -89,6 +197,16 @@ export default function RecetaBuscada(props) {
 
   let iconoFavorito = esFavorito ? "heart" : "heart-outline";
   let colorFavorito = esFavorito ? "#FF4B4B" : "#666";
+
+  if (loadingReceta) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+          <ActivityIndicator size="large" color="#D18B47" />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>

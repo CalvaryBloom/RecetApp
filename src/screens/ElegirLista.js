@@ -16,11 +16,11 @@ import ModalCrearLista from "../components/ModalCrearLista";
 import { API_BASE_URL } from "../services/service";
 
 const defaultImages = [
-    "https://cdn-icons-png.flaticon.com/512/1046/1046784.png",
-    "https://cdn-icons-png.flaticon.com/512/3075/3075977.png",
-    "https://cdn-icons-png.flaticon.com/512/3480/3480823.png",
-    "https://cdn-icons-png.flaticon.com/512/135/135620.png",
-    "https://cdn-icons-png.flaticon.com/512/2922/2922037.png"
+    "https://images.unsplash.com/photo-1498837167922-ddd27525d352?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1467003909585-2f8a72700288?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=600&q=80",
+    "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80"
 ];
 
 export default function ElegirLista({ route, navigation, token }) {

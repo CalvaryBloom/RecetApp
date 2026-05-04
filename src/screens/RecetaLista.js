@@ -10,6 +10,7 @@ import {
   ActivityIndicator
 } from "react-native";
 import { API_BASE_URL } from "../services/service";
+import BarraBusqueda from "../components/BarraBusqueda";
 
 export default function RecetaLista({ route, navigation, token }) {
   const { listaId, listaNombre } = route.params || {};
@@ -43,6 +44,26 @@ export default function RecetaLista({ route, navigation, token }) {
     }
   };
 
+  const obtenerRecetaId = (item) =>
+    item?.recetaId ??
+    item?.idReceta ??
+    item?.receta?.id ??
+    item?.id ??
+    null;
+
+  const obtenerResumenReceta = (item) => item?.receta ?? item;
+
+  const abrirDetalleReceta = (item) => {
+    const recetaId = obtenerRecetaId(item);
+    if (!recetaId) return;
+    const recetaResumen = obtenerResumenReceta(item);
+    navigation.navigate("RecetaBuscada", {
+      recipeId: recetaId,
+      recipe: recetaResumen,
+      token
+    });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
 
@@ -68,7 +89,11 @@ export default function RecetaLista({ route, navigation, token }) {
             <Text style={{textAlign: "center", marginTop: 20}}>No hay recetas en esta lista.</Text>
         ) : (
             recetas.map((item, index) => (
-            <View key={String(item.recetaId || index)} style={styles.card}>
+            <Pressable 
+                key={String(obtenerRecetaId(item) || index)} 
+                style={styles.card}
+                onPress={() => abrirDetalleReceta(item)}
+            >
                 <Text style={styles.mealTitle}>{item.titulo}</Text>
                 {item.imagenUrl ? (
                     <Image source={{ uri: item.imagenUrl }} style={styles.image} />
@@ -77,11 +102,13 @@ export default function RecetaLista({ route, navigation, token }) {
                         <Text>Sin imagen</Text>
                     </View>
                 )}
-            </View>
+            </Pressable>
             ))
         )}
+
       </ScrollView>
 
+      <BarraBusqueda currentRoute="Favoritos" token={token} />
     </SafeAreaView>
   );
 }

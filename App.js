@@ -16,6 +16,7 @@ import EditarUsuario from "./src/screens/EditarUsuario";
 import Favoritos from "./src/screens/Favoritos";
 
 import RecetaLista from "./src/screens/RecetaLista";
+import RecetaFavorita from "./src/screens/RecetaFavorita";
 
 import BarraBusqueda from "./src/components/BarraBusqueda";
 
@@ -54,7 +55,14 @@ export default function App() {
       onReady={actualizarRutaActual}
       onStateChange={actualizarRutaActual}
     >
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator
+        initialRouteName="Inicio"
+        screenOptions={{ headerShown: false }}
+      >
+        <Stack.Screen name="RecetaFavorita">
+          {(props) => <RecetaFavorita {...props} token={token} />}
+        </Stack.Screen>
+
         <Stack.Screen name="Inicio" component={RecetApp} />
 
         {/* CORRECCIÓN EN EL LOGIN: Ahora setToken y setUser sí existen arriba */}
