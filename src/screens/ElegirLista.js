@@ -7,8 +7,10 @@ import {
   Alert,
   SafeAreaView,
   Image,
-  ActivityIndicator
+  ActivityIndicator,
+  StyleSheet
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import styles from "../styles/RecetaLista";
 import BarraBusqueda from "../components/BarraBusqueda";
@@ -164,43 +166,34 @@ export default function ElegirLista({ route, navigation, token }) {
                 <Pressable
                     onPress={() => setListaSeleccionadaId(item.id)}
                     style={[
-                    styles.pildoraBorde,
-                    selected ? styles.pildoraBordeSeleccionada : null,
+                      localStyles.card,
+                      selected && localStyles.cardSelected,
                     ]}
                 >
-                    <View
-                    style={[
-                        styles.pildoraDentro,
-                        selected ? styles.pildoraDentroSeleccionada : null,
-                    ]}
-                    >
-                    <Text
-                        style={[
-                        styles.textoPildora,
-                        selected ? styles.textoPildoraSeleccionada : null,
-                        ]}
-                    >
-                        {item.nombre}
-                    </Text>
-
-                    <View
-                        style={[
-                        styles.circuloImagen,
-                        selected ? styles.circuloImagenSeleccionada : null,
-                        ]}
-                    >
+                    <View style={localStyles.cardContent}>
                         {item.imagenUrl ? (
-                        <Image
-                            source={{ uri: item.imagenUrl }}
-                            style={{
-                            width: "100%",
-                            height: "100%",
-                            borderRadius: 999,
-                            }}
-                        />
-                        ) : null}
+                            <Image
+                                source={{ uri: item.imagenUrl }}
+                                style={localStyles.cardImage}
+                            />
+                        ) : (
+                            <View style={[localStyles.cardImage, { backgroundColor: '#D18B47', justifyContent: 'center', alignItems: 'center' }]}>
+                                <Ionicons name="list" size={28} color="#FEFAE0" />
+                            </View>
+                        )}
+                        <Text
+                            style={[
+                                localStyles.cardText,
+                                selected && localStyles.cardTextSelected,
+                            ]}
+                            numberOfLines={2}
+                        >
+                            {item.nombre}
+                        </Text>
                     </View>
-                    </View>
+                    {selected && (
+                        <Ionicons name="checkmark-circle" size={24} color="#8A6F4D" style={{ marginLeft: 10 }} />
+                    )}
                 </Pressable>
                 );
             }}
@@ -228,3 +221,45 @@ export default function ElegirLista({ route, navigation, token }) {
     </SafeAreaView>
   );
 }
+
+const localStyles = StyleSheet.create({
+  card: {
+    backgroundColor: "#D7D4B5",
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardSelected: {
+    borderWidth: 2,
+    borderColor: "#8A6F4D",
+    backgroundColor: "#E4E1C1",
+  },
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  cardImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 15,
+  },
+  cardText: {
+    fontWeight: "bold",
+    color: "#8A6F4D",
+    fontSize: 16,
+    flex: 1,
+  },
+  cardTextSelected: {
+    color: "#5C4A33",
+  },
+});

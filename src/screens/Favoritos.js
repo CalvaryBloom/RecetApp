@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Alert
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { API_BASE_URL } from "../services/service";
 import BarraBusqueda from "../components/BarraBusqueda";
 
@@ -163,11 +164,6 @@ export default function FavoritosScreen({ navigation, token }) {
         />
 
         <Text style={styles.title}>MIS LISTAS</Text>
-
-        <Pressable style={styles.selectButton}>
-          <Text style={styles.selectText}>SELECCIONAR</Text>
-        </Pressable>
-
       </View>
 
       {/* Lista */}
@@ -225,25 +221,27 @@ export default function FavoritosScreen({ navigation, token }) {
 /* Componente reutilizable */
 function CategoryItem({ title, image, onPress, onEdit, onDelete }) {
   return (
-    <View style={styles.card}>
-      <Pressable style={styles.cardMain} onPress={onPress}>
-        <Text style={styles.cardText}>{title}</Text>
+    <Pressable style={styles.card} onPress={onPress}>
+      <View style={styles.cardContent}>
         {image ? (
           <Image source={{ uri: image }} style={styles.cardImage} />
         ) : (
-          <View style={styles.cardImage} />
+          <View style={[styles.cardImage, { backgroundColor: '#D18B47', justifyContent: 'center', alignItems: 'center' }]}>
+            <Ionicons name="list" size={28} color="#FEFAE0" />
+          </View>
         )}
-      </Pressable>
+        <Text style={styles.cardText} numberOfLines={2}>{title}</Text>
+      </View>
 
       <View style={styles.cardActions}>
-        <Pressable onPress={onEdit} style={styles.actionButton}>
-          <Text style={styles.actionText}>Editar</Text>
-        </Pressable>
-        <Pressable onPress={onDelete} style={styles.actionButtonDelete}>
-          <Text style={styles.actionTextDelete}>Eliminar</Text>
-        </Pressable>
+        <TouchableOpacity onPress={onEdit} style={styles.actionButton}>
+          <Ionicons name="pencil" size={20} color="#8A6F4D" />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onDelete} style={styles.actionButtonDelete}>
+          <Ionicons name="trash" size={20} color="#B84545" />
+        </TouchableOpacity>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -295,61 +293,62 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "#D7D4B5",
-    borderWidth: 2,
-    borderColor: "#D18B47",
-    borderRadius: 25,
-    padding: 14,
-    marginBottom: 20,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 12,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 
-  cardMain: {
+  cardContent: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10
+    flex: 1,
+  },
+
+  cardImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    marginRight: 15,
   },
 
   cardText: {
     fontWeight: "bold",
-    color: "#8A6F4D"
-  },
-
-  cardImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25
+    color: "#8A6F4D",
+    fontSize: 16,
+    flex: 1,
   },
 
   cardActions: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 10
+    alignItems: "center",
+    gap: 8,
+    marginLeft: 10,
   },
 
   actionButton: {
-    borderWidth: 1,
-    borderColor: "#8A6F4D",
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6
+    backgroundColor: "rgba(254, 250, 224, 0.6)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   actionButtonDelete: {
-    borderWidth: 1,
-    borderColor: "#B84545",
-    borderRadius: 16,
-    paddingHorizontal: 12,
-    paddingVertical: 6
-  },
-
-  actionText: {
-    color: "#8A6F4D",
-    fontWeight: "600"
-  },
-
-  actionTextDelete: {
-    color: "#B84545",
-    fontWeight: "600"
+    backgroundColor: "rgba(184, 69, 69, 0.15)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   modalOverlay: {

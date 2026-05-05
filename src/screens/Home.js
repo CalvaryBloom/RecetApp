@@ -182,7 +182,7 @@ export default function Home({ navigation, token }) {
   };
   
   const esFavorito = (recetaId) => {
-    return favoritos.some((fav) => fav.recetaId === recetaId)
+    return favoritos.some((fav) => String(obtenerIdRecetaEnItem(fav)) === String(recetaId));
   }
 
   const renderRecipeCard = ({ item }) => (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'; // 1. Importamos useState
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { API_BASE_URL } from '../services/service';
 
 const ContrasenyaOlvidada = (props) => {
@@ -15,11 +15,10 @@ const ContrasenyaOlvidada = (props) => {
 
   setLoading(true);
   try {
-    const response = await fetch(`${API_BASE_URL}/usuarios/recuperar-password`, {
+    const response = await fetch(`${API_BASE_URL}/auth/password/forgot`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        // Asegúrate de NO enviar cabeceras de Authorization aquí
       },
       body: JSON.stringify({ correo: correo.trim().toLowerCase() }), 
     });
@@ -48,39 +47,44 @@ const ContrasenyaOlvidada = (props) => {
 };
 
   return (
-    <View style={styles.container}>
-      <Image
-        source={require('../../assets/image1.png')}
-        style={styles.logo}
-      />
+    <KeyboardAvoidingView 
+      style={styles.container} 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        <Image
+          source={require('../../assets/image1.png')}
+          style={styles.logo}
+        />
 
-      <Text style={styles.description}>
-        ¡Nos pasa a todos!{"\n"}
-        Ingresa tu correo electrónico y te ayudaremos a recuperar tu contraseña en unos segundos.
-      </Text>
+        <Text style={styles.description}>
+          ¡Nos pasa a todos!{"\n"}
+          Ingresa tu correo electrónico y te ayudaremos a recuperar tu contraseña en unos segundos.
+        </Text>
 
-      <Text style={styles.label}>CORREO ELECTRÓNICO</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="nombreapellido@gmail.com"
-        keyboardType="email-address"
-        value={correo}
-        onChangeText={setCorreo} // 5. Actualizamos el estado al escribir
-        autoCapitalize="none"
-      />
+        <Text style={styles.label}>CORREO ELECTRÓNICO</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="nombreapellido@gmail.com"
+          keyboardType="email-address"
+          value={correo}
+          onChangeText={setCorreo}
+          autoCapitalize="none"
+        />
 
-      <TouchableOpacity 
-        style={[styles.button, loading && { opacity: 0.7 }]} 
-        onPress={handleEnviar} // 6. Llamamos a la función
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="black" />
-        ) : (
-          <Text style={styles.buttonText}>Enviar</Text>
-        )}
-      </TouchableOpacity>
-    </View>
+        <TouchableOpacity 
+          style={[styles.button, loading && { opacity: 0.7 }]} 
+          onPress={handleEnviar}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="black" />
+          ) : (
+            <Text style={styles.buttonText}>Enviar</Text>
+          )}
+        </TouchableOpacity>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -89,6 +93,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FEFAE0',
+  },
+  scrollContainer: {
+    flexGrow: 1,
     padding: 30,
     justifyContent: 'center',
   },

@@ -8,6 +8,7 @@ import {
   Image,
   Alert,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BarraBusqueda from "../components/BarraBusqueda";
@@ -70,8 +71,7 @@ export default function EditarUsuario({
 
       const usuarioActualizado = await resMe.json();
 
-      // --- CAMBIO AQUÍ: LÓGICA DE ALERGIAS OPCIONALES ---
-      // Si el campo está vacío, enviamos un array vacío [] para que no de error
+      // --- LÓGICA DE ALERGIAS ---
       const listaAlergias =
         alergias && alergias.trim().length > 0
           ? alergias
@@ -80,8 +80,9 @@ export default function EditarUsuario({
               .filter((i) => i !== "")
           : [];
 
-      // 2. SOLO llamamos al endpoint de alergias si la lista NO está vacía
+      // 2. Lógica para las alergias
       if (listaAlergias.length > 0) {
+        // Actualizamos normalmente si hay elementos
         const resAlergias = await fetch(API_URL_ALERGIAS, {
           method: "PUT",
           headers: {
@@ -94,14 +95,21 @@ export default function EditarUsuario({
         if (!resAlergias.ok) {
           throw new Error("El servidor rechazó la lista de alergias.");
         }
-
-        // Si funcionó, añadimos las alergias al objeto del estado global
-        usuarioActualizado.alergias = listaAlergias;
       } else {
-        // Si la lista está vacía, le decimos al estado global que no hay alergias
-        usuarioActualizado.alergias = [];
-        console.log("No se enviaron alergias porque el campo está vacío.");
+        // Si la lista está vacía, debemos eliminar las existentes una por una 
+        // ya que el backend no permite listas vacías (@NotEmpty)
+        const alergiasAnteriores = user?.alergias || [];
+        for (const alergia of alergiasAnteriores) {
+          const resDelete = await fetch(`${API_URL_ALERGIAS}/${alergia}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!resDelete.ok) {
+            console.error(`No se pudo eliminar la alergia: ${alergia}`);
+          }
+        }
       }
+
       // 3. Sincronizar estado global
       usuarioActualizado.alergias = listaAlergias;
       if (setUser) setUser(usuarioActualizado);
@@ -121,24 +129,24 @@ export default function EditarUsuario({
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EEDC" />
 
-      <View style={styles.imageContainer}>
-        <Image
-          source={require("../../assets/image1.png")}
-          style={styles.image}
-        />
-      </View>
-
-      <View style={styles.header}>
-        <Text style={styles.title}>Editar Usuario</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons
-            name="arrow-back-outline"
-            size={28}
-            style={{ marginLeft: 155 }}
-            color="black"
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
+        <View style={styles.imageContainer}>
+          <Image
+            source={require("../../assets/image1.png")}
+            style={styles.image}
           />
-        </TouchableOpacity>
-      </View>
+        </View>
+
+        <View style={styles.header}>
+          <Text style={styles.title}>Editar Usuario</Text>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons
+              name="arrow-back-outline"
+              size={28}
+              color="#8A6F4D"
+            />
+          </TouchableOpacity>
+        </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>NOMBRE</Text>
@@ -188,6 +196,8 @@ export default function EditarUsuario({
           <Text style={styles.buttonText}>Actualizar</Text>
         )}
       </TouchableOpacity>
+
+      </ScrollView>
 
       <BarraBusqueda currentRoute="PerfilUsuario" token={token} />
     </View>

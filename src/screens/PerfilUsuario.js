@@ -6,6 +6,7 @@ import {
   StatusBar,
   Image,
   ActivityIndicator,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BarraBusqueda from "../components/BarraBusqueda";
@@ -78,16 +79,17 @@ export default function PerfilUsuario({ navigation, route, ...props }) {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F5EEDC" />
 
-      <View style={styles.imageContainer}>
-        <Image source={require("../../assets/image1.png")} style={styles.image} />
-      </View>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ flexGrow: 1, paddingBottom: 40 }}>
+        <View style={styles.imageContainer}>
+          <Image source={require("../../assets/image1.png")} style={styles.image} />
+        </View>
 
-      <View style={styles.header}>
-        <Text style={styles.title}>Perfil Usuario</Text>
-        <TouchableOpacity onPress={() => navigation.replace("Inicio")}>
-            <Ionicons name="log-out-outline" size={28} style={{marginLeft: 155}} color="#333" />
-          </TouchableOpacity>
-      </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>Perfil Usuario</Text>
+          <TouchableOpacity onPress={() => navigation.replace("Inicio")}>
+              <Ionicons name="log-out-outline" size={28} color="#8A6F4D" />
+            </TouchableOpacity>
+        </View>
 
       <View style={styles.field}>
         <Text style={styles.label}>NOMBRE</Text>
@@ -124,6 +126,7 @@ export default function PerfilUsuario({ navigation, route, ...props }) {
       >
         <Text style={styles.buttonText}>Editar usuario</Text>
       </TouchableOpacity>
+      </ScrollView>
 
       <BarraBusqueda currentRoute="PerfilUsuario" token={token} user={userData} />
     </View>
