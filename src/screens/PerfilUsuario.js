@@ -27,7 +27,7 @@ export default function PerfilUsuario({ navigation, route, ...props }) {
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async () => {
-    // Si realmente no hay token, lo logueamos para debug
+    // Si no hay token, lo logueamos para debug
     if (!token) {
       console.log("DEBUG: Sigo sin recibir token. Props:", props.token, "Params:", route.params?.token);
       setLoading(false);
