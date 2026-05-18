@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,38 +6,165 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import styles from "../styles/RecetaFavorito";
+import BarraBusqueda from "../components/BarraBusqueda";
+import { API_BASE_URL } from "../services/service";
 
-export default function RecetaFavorita({ route, navigation }) {
-  const recipe = route?.params?.recipe;
+export default function RecetaFavorita({ route, navigation, token }) {
+  const { recetaId, recipe } = route.params || {};
+  const recetaIdResuelto =
+    recetaId ?? recipe?.id ?? recipe?.recetaId ?? recipe?.idReceta ?? null;
 
-  const fallbackRecipe = useMemo(
-    () => ({
-      title: "Receta favorita",
-      image:
-        "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=900&q=60",
-      ingredients: ["Ingrediente 1", "Ingrediente 2", "Ingrediente 3"],
-    }),
-    [],
-  );
+  const [receta, setReceta] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [esFavorito, setEsFavorito] = useState(false);
 
-  const receta = recipe || fallbackRecipe;
-
-  const ingredientes = useMemo(() => {
-    if (
-      receta.ingredients &&
-      Array.isArray(receta.ingredients) &&
-      receta.ingredients.length > 0
-    ) {
-      return receta.ingredients;
+  useEffect(() => {
+    if (recipe) {
+      setReceta(recipe);
     }
-    return fallbackRecipe.ingredients;
-  }, [receta, fallbackRecipe.ingredients]);
 
-  const [isFav, setIsFav] = useState(true);
+    if (!recetaIdResuelto || !token) {
+      setLoading(false);
+      return;
+    }
+
+    fetchRecetaCompleta();
+    checkFavorito();
+  }, [recetaIdResuelto, token]);
+
+  const fetchRecetaCompleta = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/recetas/${recetaIdResuelto}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setReceta(data);
+      } else {
+        console.error("Error fetching receta", response.status);
+      }
+    } catch (error) {
+      console.error("Error de red", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkFavorito = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/favoritos/isFavorite/${recetaIdResuelto}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const isFav = await res.json();
+        setEsFavorito(isFav);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const obtenerIdRecetaEnItem = (item) =>
+    item?.recetaId ?? item?.idReceta ?? item?.receta?.id ?? item?.id ?? null;
+
+  const quitarRecetaDeTodasLasListas = async () => {
+    if (!recetaIdResuelto || !token) return;
+
+    try {
+      const listasRes = await fetch(`${API_BASE_URL}/listas/mine`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!listasRes.ok) return;
+
+      const listas = await listasRes.json();
+      if (!Array.isArray(listas) || listas.length === 0) return;
+
+      for (const lista of listas) {
+        const recetasRes = await fetch(`${API_BASE_URL}/listas/${lista.id}/recetas`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!recetasRes.ok) continue;
+
+        const recetasLista = await recetasRes.json();
+        const existe = Array.isArray(recetasLista)
+          ? recetasLista.some((item) => String(obtenerIdRecetaEnItem(item)) === String(recetaIdResuelto))
+          : false;
+
+        if (!existe) continue;
+
+        await fetch(`${API_BASE_URL}/listas/${lista.id}/recetas/${recetaIdResuelto}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (error) {
+      console.error("Error quitando receta de listas:", error);
+    }
+  };
+
+  async function cambiarFavorito() {
+    if (!recetaIdResuelto || !token) return;
+
+    const nuevoEstado = !esFavorito;
+    setEsFavorito(nuevoEstado); 
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/favoritos/toggle/${recetaIdResuelto}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        if (nuevoEstado && receta) {
+          navigation.navigate("ElegirLista", { receta });
+        } else {
+          await quitarRecetaDeTodasLasListas();
+        }
+      } else {
+        setEsFavorito(!nuevoEstado);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite", error);
+      setEsFavorito(!nuevoEstado);
+    }
+  }
+
+  if (loading) {
+      return (
+          <SafeAreaView style={[styles.safeArea, {justifyContent: 'center', alignItems: 'center'}]}>
+              <ActivityIndicator size="large" color="#D18B47" />
+          </SafeAreaView>
+      );
+  }
+
+  if (!receta) {
+      return (
+          <SafeAreaView style={[styles.safeArea, {justifyContent: 'center', alignItems: 'center'}]}>
+              <Text>No se ha seleccionado ninguna receta.</Text>
+              <TouchableOpacity onPress={() => navigation.replace("Inicio")}>
+                <Text style={{ marginTop: 10, color: "#8C7A5A", fontWeight: "600" }}>
+                  Volver al inicio
+                </Text>
+              </TouchableOpacity>
+          </SafeAreaView>
+      );
+  }
+
+  const titulo = receta.titulo || "Sin título";
+  const imagen = receta.imagenUrl;
+  const descripcion = receta.descripcion;
+  const ingredientes = receta.ingredientes || [];
+
+  let iconoFavorito = esFavorito ? "heart" : "heart-outline";
+  let colorFavorito = esFavorito ? "#FF4B4B" : "#666";
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -63,13 +190,13 @@ export default function RecetaFavorita({ route, navigation }) {
 
         <View style={styles.chosenBar}>
           <Text style={styles.chosenText} numberOfLines={1}>
-            {receta.title}
+            {titulo}
           </Text>
           <Ionicons name="search-outline" size={20} color="#666" />
         </View>
 
         {/* Título */}
-        <Text style={styles.title}>{receta.title}</Text>
+        <Text style={styles.title}>{titulo}</Text>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -77,19 +204,33 @@ export default function RecetaFavorita({ route, navigation }) {
         >
           {/* Imagen */}
           <View style={styles.imageWrapper}>
-            <Image source={{ uri: receta.image }} style={styles.image} />
+            {imagen ? (
+              <Image source={{ uri: imagen }} style={styles.image} />
+            ) : (
+              <View
+                style={[
+                  styles.image,
+                  { alignItems: "center", justifyContent: "center", backgroundColor: "#ddd" }
+                ]}
+              >
+                <Text>Sin imagen</Text>
+              </View>
+            )}
 
             <TouchableOpacity
               style={styles.heartButton}
-              onPress={() => setIsFav(!isFav)}
+              onPress={cambiarFavorito}
             >
               <Ionicons
-                name={isFav ? "heart" : "heart-outline"}
+                name={iconoFavorito}
                 size={22}
-                color={isFav ? "#FF4B4B" : "#666"}
+                color={colorFavorito}
               />
             </TouchableOpacity>
           </View>
+
+          {/* Descripción */}
+          <Text style={{ margin: 10 }}>{descripcion}</Text>
 
           {/* Ingredientes */}
           <View style={styles.ingredientsHeader}>
@@ -102,15 +243,19 @@ export default function RecetaFavorita({ route, navigation }) {
           </View>
 
           <View style={styles.ingredientsBox}>
-            {ingredientes.map((item, idx) => (
-              <Text key={`${item}-${idx}`} style={styles.ingredientItem}>
-                • {item}
-              </Text>
-            ))}
+            {ingredientes.length > 0 ? (
+              ingredientes.map((ing, idx) => (
+                <Text key={idx} style={styles.ingredientItem}>
+                  • {ing.nombre} {ing.cantidad} {ing.unidad}
+                </Text>
+              ))
+            ) : (
+              <Text>No hay ingredientes</Text>
+            )}
           </View>
 
           <View style={{ height: 90 }} />
-          <BarraBusqueda currentRoute="Favoritos" />
+          <BarraBusqueda currentRoute="Favoritos" token={token} />
         </ScrollView>
       </View>
     </SafeAreaView>

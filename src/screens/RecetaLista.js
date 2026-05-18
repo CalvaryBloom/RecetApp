@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,107 +7,108 @@ import {
   ScrollView,
   Image,
   Pressable,
+  ActivityIndicator
 } from "react-native";
-
+import { API_BASE_URL } from "../services/service";
 import BarraBusqueda from "../components/BarraBusqueda";
 
+export default function RecetaLista({ route, navigation, token }) {
+  const { listaId, listaNombre } = route.params || {};
+  const [recetas, setRecetas] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function RecetaLista({ route, navigation }) {
-  const categoria = route?.params?.categoria;
+  useEffect(() => {
+    if (listaId) {
+      fetchRecetas();
+    }
+  }, [listaId, token]);
 
-  const meals = {
-    DESAYUNO: [
-      {
-        title: "TOSTADAS CON TOMATE Y JAMÓN",
-        image:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQc4XY7qI2l_ohuHrK7HTc8DQTJ5eLYyAeb1w&s",
-        description:
-          "Tostadas crujientes con tomate natural y jamón serrano.",
-        ingredients: [
-          "Pan",
-          "Tomate",
-          "Jamón serrano",
-          "Aceite de oliva",
-          "Sal"
-        ]
-      },
-      {
-        title: "TOSTADAS DE AGUACATE",
-        image:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5AcZXS09njuYqfHRcQqRTytiCH5e1Xm09lA&s",
-        description:
-          "Tostadas saludables con aguacate cremoso.",
-        ingredients: [
-          "Pan",
-          "Aguacate",
-          "Limón",
-          "Aceite de oliva",
-          "Sal",
-          "Pimienta"
-        ]
+  const fetchRecetas = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/listas/${listaId}/recetas`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRecetas(data);
+      } else {
+        console.error("Error fetching recetas", response.status);
       }
-    ],
-
-    CENA: [
-      {
-        title: "ENSALADA LIGERA",
-        image:
-          "https://www.novachef.es/media/images/ensalada-atun-lechuga.png",
-        description: "Ensalada fresca perfecta para la noche.",
-        ingredients: ["Lechuga", "Tomate", "Atún", "Aceite"]
-      }
-    ]
+    } catch (error) {
+      console.error("Error de red", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recetas = meals[categoria] || [];
+  const obtenerRecetaId = (item) =>
+    item?.recetaId ??
+    item?.idReceta ??
+    item?.receta?.id ??
+    item?.id ??
+    null;
+
+  const obtenerResumenReceta = (item) => item?.receta ?? item;
+
+  const abrirDetalleReceta = (item) => {
+    const recetaId = obtenerRecetaId(item);
+    if (!recetaId) return;
+    const recetaResumen = obtenerResumenReceta(item);
+    navigation.navigate("RecetaBuscada", {
+      recipeId: recetaId,
+      recipe: recetaResumen,
+      token
+    });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
+
       {/* Header */}
       <View style={styles.header}>
         <Image
-          source={require("../../assets/image1.png")}
-          style={styles.logo}
+            source={require('../../assets/image1.png')}
+            style={styles.logo}
         />
         <Pressable onPress={() => navigation.goBack()}>
           <Text style={styles.back}>←</Text>
         </Pressable>
       </View>
-      <View>
-        <Text style={styles.title}>{categoria}</Text>
-      </View>
+
+      {/* Title */}
+      <Text style={styles.categoryTitle}>{listaNombre || "LISTA"}</Text>
 
       {/* Content */}
       <ScrollView contentContainerStyle={styles.scroll}>
-        {recetas.length === 0 ? (
-          <Text style={styles.noRecipes}>
-            No hay recetas para esta categoría
-          </Text>
+        {loading ? (
+            <ActivityIndicator size="large" color="#D18B47" style={{marginTop: 50}} />
+        ) : recetas.length === 0 ? (
+            <Text style={{textAlign: "center", marginTop: 20}}>No hay recetas en esta lista.</Text>
         ) : (
-          recetas.map((recipe, index) => (
-            <View key={index} style={styles.card}>
-
-              <Text style={styles.title}>{recipe.title}</Text>
-
-              <Image source={{ uri: recipe.image }} style={styles.image} />
-
-              <Text style={styles.description}>
-                {recipe.description}
-              </Text>
-
-              <Text style={styles.ingredientsTitle}>Ingredientes:</Text>
-
-              {recipe.ingredients.map((ingredient, i) => (
-                <Text key={i} style={styles.ingredientItem}>
-                  • {ingredient}
-                </Text>
-              ))}
-
-            </View>
-          ))
+            recetas.map((item, index) => (
+            <Pressable 
+                key={String(obtenerRecetaId(item) || index)} 
+                style={styles.card}
+                onPress={() => abrirDetalleReceta(item)}
+            >
+                <Text style={styles.mealTitle}>{item.titulo}</Text>
+                {item.imagenUrl ? (
+                    <Image source={{ uri: item.imagenUrl }} style={styles.image} />
+                ) : (
+                    <View style={[styles.image, { backgroundColor: '#ccc', justifyContent: 'center', alignItems: 'center' }]}>
+                        <Text>Sin imagen</Text>
+                    </View>
+                )}
+            </Pressable>
+            ))
         )}
+
       </ScrollView>
-      <BarraBusqueda currentRoute="Favoritos" />
+
+      <BarraBusqueda currentRoute="Favoritos" token={token} />
     </SafeAreaView>
   );
 }
@@ -115,67 +116,59 @@ export default function RecetaLista({ route, navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FEFAE0",
-    paddingHorizontal: 16,
-    paddingTop: 6,
+    backgroundColor: "#E9DFC7"
   },
 
   header: {
     flexDirection: "row",
-    alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 6,
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10
   },
 
   logo: {
-    width: 110,
-    height: 45,
+    width: 150,
+    height: 60,
+    resizeMode: 'contain'
   },
 
   back: {
-    padding: 8,
-    borderRadius: 20,
+    fontSize: 25,
+    color: "#8A6F4D",
+    paddingHorizontal: 10
   },
 
-  noRecipes: {
-    textAlign: "center",
-    marginTop: 40,
-    color: "#8A6F4D"
-  },
-
-  card: {
-    marginBottom: 30,
-    backgroundColor: "#D7D4B5",
-    padding: 15,
-    borderRadius: 15
-  },
-
-  title: {
+  categoryTitle: {
     textAlign: "center",
     fontWeight: "bold",
     color: "#8A6F4D",
-    marginBottom: 10
+    marginBottom: 15,
+    fontSize: 18,
+    textTransform: 'uppercase'
+  },
+
+  scroll: {
+    paddingHorizontal: 20,
+    paddingBottom: 80
+  },
+
+  card: {
+    marginBottom: 25
+  },
+
+  mealTitle: {
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "#B79B6C",
+    marginBottom: 10,
+    textTransform: 'uppercase'
   },
 
   image: {
-    width: "100%",
+    width: 300,
     height: 180,
-    borderRadius: 10,
-    marginBottom: 10
-  },
-
-  description: {
-    marginBottom: 10,
-    color: "#6B5E4A"
-  },
-
-  ingredientsTitle: {
-    fontWeight: "bold",
-    marginBottom: 5,
-    color: "#8A6F4D"
-  },
-
-  ingredientItem: {
-    color: "#6B5E4A"
+    alignSelf: "center",
+    borderRadius: 8
   }
 });

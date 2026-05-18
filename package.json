@@ -2,9 +2,11 @@
   "license": "0BSD",
   "main": "index.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "expo start --host tunnel -c",
+    "start:lan": "expo start --host lan -c",
+    "start:tunnel": "expo start --host tunnel -c",
+    "android": "expo start --host tunnel --android -c",
+    "ios": "expo start --host tunnel --ios -c",
     "web": "expo start --web"
   },
   "dependencies": {

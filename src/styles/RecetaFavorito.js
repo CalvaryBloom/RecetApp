@@ -32,7 +32,7 @@ export default StyleSheet.create({
 
   chosenLabel: {
     textAlign: "center",
-    color: "#8C7A5A",
+    color: "#8A6F4D",
     marginTop: 8,
     marginBottom: 8,
     fontSize: 13,
@@ -49,8 +49,9 @@ export default StyleSheet.create({
   },
 
   chosenText: {
-    color: "#333",
+    color: "#5C4A33",
     fontSize: 14,
+    fontWeight: "bold",
     maxWidth: "88%",
   },
 
@@ -60,7 +61,7 @@ export default StyleSheet.create({
     textAlign: "center",
     fontSize: 20,
     fontWeight: "600",
-    color: "#8C7A5A",
+    color: "#8A6F4D",
   },
 
   scrollContent: {
@@ -98,20 +99,20 @@ export default StyleSheet.create({
   ingredientsTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#8C7A5A",
+    color: "#8A6F4D",
     letterSpacing: 0.5,
   },
 
   ingredientsBox: {
-    borderWidth: 1,
-    borderColor: "#CCD5AE",
-    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: "#D7D4B5",
+    borderRadius: 15,
     padding: 12,
-    backgroundColor: "#FEFAE0",
+    backgroundColor: "#FFFFFF",
   },
 
   ingredientItem: {
-    color: "#6C757D",
+    color: "#5C4A33",
     fontSize: 14,
     lineHeight: 20,
     marginBottom: 4,
