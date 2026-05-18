@@ -1,9 +1,8 @@
-import React, { useState } from 'react'; // 1. Importamos useState
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, ActivityIndicator, KeyboardAvoidingView, ScrollView, Platform } from 'react-native';
 import { API_BASE_URL } from '../services/service';
 
 const ContrasenyaOlvidada = (props) => {
-  // 2. Definimos los estados para el correo y la carga
   const [correo, setCorreo] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -88,7 +87,6 @@ const ContrasenyaOlvidada = (props) => {
   );
 };
 
-// ... Tus estilos se mantienen exactamente igual
 const styles = StyleSheet.create({
   container: {
     flex: 1,

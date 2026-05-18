@@ -169,7 +169,6 @@ export default function RecetaFavorita({ route, navigation, token }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/image1.png")}
@@ -185,7 +184,6 @@ export default function RecetaFavorita({ route, navigation, token }) {
           </TouchableOpacity>
         </View>
 
-        {/* Has elegido */}
         <Text style={styles.chosenLabel}>Has elegido:</Text>
 
         <View style={styles.chosenBar}>
@@ -195,14 +193,12 @@ export default function RecetaFavorita({ route, navigation, token }) {
           <Ionicons name="search-outline" size={20} color="#666" />
         </View>
 
-        {/* Título */}
         <Text style={styles.title}>{titulo}</Text>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* Imagen */}
           <View style={styles.imageWrapper}>
             {imagen ? (
               <Image source={{ uri: imagen }} style={styles.image} />
@@ -229,10 +225,8 @@ export default function RecetaFavorita({ route, navigation, token }) {
             </TouchableOpacity>
           </View>
 
-          {/* Descripción */}
           <Text style={{ margin: 10 }}>{descripcion}</Text>
 
-          {/* Ingredientes */}
           <View style={styles.ingredientsHeader}>
             <Text style={styles.ingredientsTitle}>INGREDIENTES</Text>
             <Ionicons

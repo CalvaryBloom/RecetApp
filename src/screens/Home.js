@@ -26,7 +26,6 @@ export default function Home({ navigation, token }) {
   const [activeFilters, setActiveFilters] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Cargar datos al iniciar
   useEffect(() => {
     fetchRecetas();
     fetchFavoritos();
@@ -130,7 +129,6 @@ export default function Home({ navigation, token }) {
         throw new Error(`Error ${response.status} al actualizar favorito`);
       }
 
-      // Si acaba de marcarla como favorita, va directo a elegir lista.
       if (!favoritoActual) {
         navigation.navigate("ElegirLista", { receta });
       } else {
@@ -191,7 +189,6 @@ export default function Home({ navigation, token }) {
       onPress={() => navigation.navigate("RecetaBuscada", { recipe: item })}
     >
       <View style={styles.card}>
-        {/* Usamos imagenUrl que es como viene en el RecetaResponse de Java */}
         <Image source={{ uri: item.imagenUrl }} style={styles.cardImage} />
         <View style={styles.cardContent}>
           <View style={styles.cardHeader}>
@@ -212,7 +209,6 @@ export default function Home({ navigation, token }) {
           <View style={styles.timeContainer}>
             <Ionicons name="time-outline" size={16} color="#666" />
             <Text style={styles.timeText}>
-              {/* Tiempo total = prep + coccion */}
               {(item.tiempoPreparacionMin || 0) +
                 (item.tiempoCoccionMin || 0)}{" "}
               min

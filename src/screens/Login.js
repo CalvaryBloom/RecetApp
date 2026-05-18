@@ -50,8 +50,6 @@ export default class Login extends Component {
       if (data.token) {
         console.log("Login exitoso, token obtenido:", data.token);
 
-        // --- CAMBIOS PARA ESTADO GLOBAL ---
-        // Accedemos a las funciones pasadas por App.js
         const { setToken, setUser } = this.props;
 
         if (setToken && setUser) {
@@ -61,7 +59,7 @@ export default class Login extends Component {
         } else {
           console.warn("Advertencia: App.js no pasó las funciones setToken/setUser.");
         }
-        // ----------------------------------
+
 
         this.props.navigation.navigate('Home', { 
           token: data.token, 

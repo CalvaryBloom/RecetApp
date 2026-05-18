@@ -50,7 +50,6 @@ export default function EditarUsuario({
 
     setLoading(true);
     try {
-      // 1. Actualizar datos básicos
       const resMe = await fetch(API_URL_ME, {
         method: "PUT",
         headers: {
@@ -71,7 +70,7 @@ export default function EditarUsuario({
 
       const usuarioActualizado = await resMe.json();
 
-      // --- LÓGICA DE ALERGIAS ---
+
       const listaAlergias =
         alergias && alergias.trim().length > 0
           ? alergias
@@ -80,9 +79,8 @@ export default function EditarUsuario({
               .filter((i) => i !== "")
           : [];
 
-      // 2. Lógica para las alergias
       if (listaAlergias.length > 0) {
-        // Actualizamos normalmente si hay elementos
+
         const resAlergias = await fetch(API_URL_ALERGIAS, {
           method: "PUT",
           headers: {
@@ -96,8 +94,7 @@ export default function EditarUsuario({
           throw new Error("El servidor rechazó la lista de alergias.");
         }
       } else {
-        // Si la lista está vacía, debemos eliminar las existentes una por una 
-        // ya que el backend no permite listas vacías (@NotEmpty)
+
         const alergiasAnteriores = user?.alergias || [];
         for (const alergia of alergiasAnteriores) {
           const resDelete = await fetch(`${API_URL_ALERGIAS}/${alergia}`, {
@@ -110,7 +107,6 @@ export default function EditarUsuario({
         }
       }
 
-      // 3. Sincronizar estado global
       usuarioActualizado.alergias = listaAlergias;
       if (setUser) setUser(usuarioActualizado);
 

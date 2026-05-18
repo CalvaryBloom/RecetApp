@@ -57,8 +57,6 @@ export default function RecetaBuscada(props) {
         const data = await response.json();
         setReceta(data);
       } else if (response.status === 403) {
-        // Fallback: algunos usuarios no tienen permiso en /recetas/:id,
-        // pero sí pueden ver la receta dentro del listado general.
         await fetchRecetaDesdeListado();
       } else {
         console.error("Error cargando receta completa:", response.status);
@@ -153,7 +151,6 @@ export default function RecetaBuscada(props) {
 
   async function cambiarFavorito() {
     if (!recetaId || !token) {
-        // Fallback for testing without token
         const nuevoEstado = !esFavorito;
         setEsFavorito(nuevoEstado);
         if (nuevoEstado) {
@@ -163,7 +160,7 @@ export default function RecetaBuscada(props) {
     }
 
     const nuevoEstado = !esFavorito;
-    setEsFavorito(nuevoEstado); // Optimistic UI
+    setEsFavorito(nuevoEstado);
 
     try {
       const res = await fetch(`${API_BASE_URL}/favoritos/toggle/${recetaId}`, {
@@ -178,7 +175,6 @@ export default function RecetaBuscada(props) {
           await quitarRecetaDeTodasLasListas();
         }
       } else {
-        // Revert on failure
         setEsFavorito(!nuevoEstado);
       }
     } catch (error) {
@@ -187,12 +183,10 @@ export default function RecetaBuscada(props) {
     }
   }
 
-  // 🔴 Adaptamos nombres del backend
   const titulo = receta?.titulo || "Sin título";
   const imagen = receta?.imagenUrl;
   const descripcion = receta?.descripcion;
 
-  // 🔥 IMPORTANTE: ingredientes vienen como objetos
   const ingredientes = receta?.ingredientes || [];
 
   let iconoFavorito = esFavorito ? "heart" : "heart-outline";
@@ -211,7 +205,6 @@ export default function RecetaBuscada(props) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        {/* HEADER */}
         <View style={styles.header}>
           <Image
             source={require("../../assets/image1.png")}
@@ -239,7 +232,6 @@ export default function RecetaBuscada(props) {
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.scrollContent}
         >
-          {/* IMAGEN */}
           <View style={styles.imageWrapper}>
             <Image source={{ uri: imagen }} style={styles.image} />
 
@@ -251,10 +243,8 @@ export default function RecetaBuscada(props) {
             </TouchableOpacity>
           </View>
 
-          {/* DESCRIPCIÓN */}
           <Text style={{ margin: 10 }}>{descripcion}</Text>
 
-          {/* INGREDIENTES */}
           <View style={styles.ingredientsHeader}>
             <Text style={styles.ingredientsTitle}>INGREDIENTES</Text>
             <Ionicons name="restaurant-outline" size={18} color="#8C7A5A" />

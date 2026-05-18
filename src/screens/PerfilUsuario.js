@@ -15,11 +15,8 @@ import { API_BASE_URL } from "../services/service";
 
 const API_URL = `${API_BASE_URL}/usuarios/me`;
 
-// Recibimos props y route
 export default function PerfilUsuario({ navigation, route, ...props }) {
   
-  // LOGICA DE SEGURIDAD PARA EL TOKEN:
-  // Lo buscamos en route.params (BarraBusqueda) o en props (App.js)
   const token = route.params?.token || props.token;
   const userFromParams = route.params?.user || props.user;
 
@@ -27,7 +24,6 @@ export default function PerfilUsuario({ navigation, route, ...props }) {
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async () => {
-    // Si realmente no hay token, lo logueamos para debug
     if (!token) {
       console.log("DEBUG: Sigo sin recibir token. Props:", props.token, "Params:", route.params?.token);
       setLoading(false);
@@ -55,17 +51,14 @@ export default function PerfilUsuario({ navigation, route, ...props }) {
   };
 
   useEffect(() => {
-    // Cargamos datos al entrar
     fetchUserData();
 
-    // Cargamos datos cada vez que la pantalla vuelva a estar en primer plano
     const unsubscribe = navigation.addListener("focus", () => {
       fetchUserData();
     });
     return unsubscribe;
   }, [navigation, token]);
 
-  // Si está cargando y no tenemos datos previos, mostramos spinner
   if (loading && !userData) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>

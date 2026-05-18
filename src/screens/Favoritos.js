@@ -156,7 +156,6 @@ export default function FavoritosScreen({ navigation, token }) {
   return (
     <SafeAreaView style={styles.container}>
       
-      {/* Header */}
       <View style={styles.header}>
         <Image
                 source={require('../../assets/image1.png')}
@@ -166,7 +165,6 @@ export default function FavoritosScreen({ navigation, token }) {
         <Text style={styles.title}>MIS LISTAS</Text>
       </View>
 
-      {/* Lista */}
       <ScrollView contentContainerStyle={styles.list}>
         {loading ? (
            <ActivityIndicator size="large" color="#D18B47" style={{marginTop: 50}} />
@@ -218,7 +216,6 @@ export default function FavoritosScreen({ navigation, token }) {
   );
 }
 
-/* Componente reutilizable */
 function CategoryItem({ title, image, onPress, onEdit, onDelete }) {
   return (
     <Pressable style={styles.card} onPress={onPress}>
@@ -245,7 +242,6 @@ function CategoryItem({ title, image, onPress, onEdit, onDelete }) {
   );
 }
 
-/* Estilos */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
