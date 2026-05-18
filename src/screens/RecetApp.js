@@ -7,7 +7,6 @@ class Inicio extends Component {
     return (
       <View style={styles.container}>
         
-        {/* Logo desde assets */}
         <Image
           source={require('../../assets/image1.png')}
           style={styles.logo}
@@ -18,7 +17,6 @@ class Inicio extends Component {
           para cada comida, de forma rápida y sencilla.
         </Text>
 
-        {/* Botón Iniciar Sesión */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => this.props.navigation.navigate('Login')}
@@ -26,7 +24,6 @@ class Inicio extends Component {
           <Text style={styles.buttonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
 
-        {/* Botón Registrarse */}
         <TouchableOpacity
           style={styles.button}
           onPress={() => this.props.navigation.navigate('Registro')}

@@ -67,7 +67,6 @@ export default function RecetaLista({ route, navigation, token }) {
   return (
     <SafeAreaView style={styles.container}>
 
-      {/* Header */}
       <View style={styles.header}>
         <Image
             source={require('../../assets/image1.png')}
@@ -78,10 +77,8 @@ export default function RecetaLista({ route, navigation, token }) {
         </Pressable>
       </View>
 
-      {/* Title */}
       <Text style={styles.categoryTitle}>{listaNombre || "LISTA"}</Text>
 
-      {/* Content */}
       <ScrollView contentContainerStyle={styles.scroll}>
         {loading ? (
             <ActivityIndicator size="large" color="#D18B47" style={{marginTop: 50}} />

@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
 
-// Importamos tus estilos originales
 import styles from '../styles/Registro';
 import { API_BASE_URL } from '../services/service';
 
 export default function Registro({ navigation }) {
-  // Estados para capturar lo que el usuario escribe
   const [nombre, setNombre] = useState('');
   const [apellidos, setApellidos] = useState('');
   const [correo, setCorreo] = useState('');
@@ -14,7 +12,6 @@ export default function Registro({ navigation }) {
   const [loading, setLoading] = useState(false);
 
   const handleRegistro = async () => {
-    // Validación de campos vacíos
     if (!nombre || !apellidos || !correo || !password) {
       Alert.alert("Error", "Por favor, completa todos los campos");
       return;
@@ -23,7 +20,6 @@ export default function Registro({ navigation }) {
     try {
       setLoading(true);
 
-      // Petición POST según el punto 1 de tu documentación
       const response = await fetch(`${API_BASE_URL}/usuarios/register`, {
         method: 'POST',
         headers: {
@@ -34,7 +30,7 @@ export default function Registro({ navigation }) {
           apellidos: apellidos,
           correo: correo,
           password: password,
-          alergias: [] // Enviamos array vacío por defecto como pide la API
+          alergias: []
         }),
       });
 
@@ -45,7 +41,6 @@ export default function Registro({ navigation }) {
           { text: "Ir al Login", onPress: () => navigation.navigate('Login') }
         ]);
       } else {
-        // Mostramos el error que devuelva tu API (ej: "El correo ya existe")
         Alert.alert("Error", data.error || "No se pudo realizar el registro");
       }
     } catch (error) {

@@ -23,14 +23,12 @@ export default function ModalCrearLista({ visible, onClose, onSave }) {
   };
 
   const elegirImagen = async () => {
-    // Pedir permiso
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
       Alert.alert("Permiso denegado", "Activa permisos de galería.");
       return;
     }
 
-    // Abrir galería
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
@@ -49,7 +47,6 @@ export default function ModalCrearLista({ visible, onClose, onSave }) {
       return;
     }
 
-    //  Esto es lo que hace que “se guarde” en ElegirLista
     onSave?.({ nombre, imagen: imageUri });
 
     cerrar();
@@ -58,7 +55,7 @@ export default function ModalCrearLista({ visible, onClose, onSave }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={cerrar}>
       <Pressable style={styles.overlay} onPress={cerrar}>
-        <Pressable style={styles.modalBox} onPress={() => {}}>
+        <Pressable style={styles.modalBox} onPress={() => { }}>
           <TextInput
             style={styles.input}
             placeholder="Nombre lista"
@@ -66,7 +63,7 @@ export default function ModalCrearLista({ visible, onClose, onSave }) {
             onChangeText={setNombreLista}
           />
 
-          {/* Preview opcional */}
+
           {imageUri ? (
             <View style={{ alignItems: "center", marginBottom: 12 }}>
               <Image
